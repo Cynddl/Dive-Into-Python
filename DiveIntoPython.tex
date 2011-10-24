@@ -7,8 +7,24 @@
 \usepackage[pdfborder=0]{hyperref} % permet les hyperliens dans la table des matières et les footnotes.
 \usepackage{fourier}
 \usepackage{fullpage}
-\usepackage{listings}
-\lstset{language=Python}
+
+\usepackage{color, listings,bera}
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{60,179,113}
+\lstset{language=Python, basicstyle=\small\ttfamily, keywordstyle=\color{keywords}, commentstyle=\color{comments}\emph}
+\lstdefinestyle{none}{language={}, commentstyle={}}
+
+\usepackage{tocloft}
+
+\newcounter{example}
+\newenvironment{example}[1][]{
+  \refstepcounter{example}\par\medskip\noindent
+  \textbf{Exemple~\thechapter.\theexample. #1}
+  \rmfamily
+}{\medskip}
+
+\newcommand\note[2]{\medskip\noindent \rule{1ex}{1ex} \textbf{Note : #1} \\ #2\medskip}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \hypersetup{ % Modifiez la valeur des champs suivants
@@ -18,6 +34,8 @@
     pdfkeywords = {python},%
     pdfproducer = {PDFLaTeX}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \begin{document}
 
 \noindent {\Huge Plongez au coeur de Python}

@@ -42,7 +42,7 @@ Voici la procédure pour installer ActivePython :
 
 Vous verrez quelque chose comme l'écran suivant :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 PythonWin 2.2.2 (#37, Nov 26 2002, 10:24:37) [MSC 32 bit (Intel)] on win32.
 Portions Copyright 1994-2001 Mark Hammond (mhammond@skippinet.com.au) -
 see 'Help/About PythonWin' for further copyright information.
@@ -60,7 +60,7 @@ see 'Help/About PythonWin' for further copyright information.
     \item Après l'achèvement de l'installation, fermez le programme d'installation et lancez Démarrer > Programmes > Python 2.3 > IDLE (Python GUI). Vous verrez quelque chose comme l'écran suivant :
 \end{enumerate}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Python 2.3.2 (#49, Oct  2 2003, 20:02:00) [MSC v.1200 32 bit (Intel)] on win32
 Type "copyright", "credits" or "license()" for more information.
 \begin{center}
@@ -95,7 +95,7 @@ Pour utiliser la version préinstallée de Python, suivez ces étapes :
 \medskip
 \noindent Essayez :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Welcome to Darwin!
 [localhost:~] you% python
 Python 2.2 (#1, 07/14/02, 23:25:09)
@@ -132,8 +132,8 @@ MacPython IDE 1.0.1
 
 Notez qu'une fois que vous installez la dernière version, la version préinstallée est toujours présente. Si vous exécutez des scripts depuis la ligne de commande, vous devez savoir quelle version de Python vous utilisez.
 
-\paragraph*{Exemple 1.1. Deux versions de Python}
-\begin{lstlisting}
+\begin{example}[Deux versions de Python]
+\begin{lstlisting}[style=none]
 [localhost:~] you% python
 Python 2.2 (#1, 07/14/02, 23:25:09)
 [GCC Apple cpp-precomp 6.14] on darwin
@@ -146,6 +146,7 @@ Type "help", "copyright", "credits", or "license" for more information.
 >>> [press Ctrl+D to get back to the command prompt]
 [localhost:~] you%
 \end{lstlisting}
+\end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Python sous Mac OS 9}\label{Python sous Mac OS 9}
@@ -179,9 +180,8 @@ MacPython IDE 1.0.1
 L'installation sous un système d'exploitation compatible UNIX tel que Linux est simple si vous choisissez l'installation d'un paquetage binaire. Des paquetage binaires précompilés sont disponibles pour les distributions Linux les plus répandues. Vous pouvez également compiler à partir des sources.
 Téléchargez le dernier RPM Python en allant sur \url{http://www.python.org/ftp/python/2.3.3/} et en sélectionnant le numéro de version le plus haut, puis en sélectionnant le sous-répertoire rpms/ de cette version. Téléchargez ensuite le RPM ayant le plus haut numéro de version. Vous pouvez l'installer avec la commande rpm, comme ci-dessous :
 
-\paragraph*{Exemple 1.2. Installation sous RedHat Linux 9}
-
-\begin{lstlisting}
+\begin{example}[Installation sous RedHat Linux 9]
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 [root@localhost root]# wget http://python.org/ftp/python/2.3/rpms/redhat-9/python2.3-2.3-5pydotorg.i386.rpm
@@ -206,6 +206,7 @@ Type "help", "copyright", "credits", or "license" for more information.
 [root@localhost root]# which python2.3 (3)
 /usr/bin/python2.3
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
     \item{Attention ! Taper simplement python lance l'ancienne version de Python (celle qui était installée par défaut). Ce n'est pas celle que vous voulez.}
@@ -218,9 +219,8 @@ Type "help", "copyright", "credits", or "license" for more information.
 
 Si vous avez la chance d'utiliser Debian GNU/Linux, vous pouvez installer Python à l'aide de la commande apt.
 
-\paragraph*{Exemple 1.3. Installation sous Debian GNU/Linux}
-
-\begin{lstlisting}
+\begin{example}[Installation sous Debian GNU/Linux]
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 localhost:~# apt-get install python
@@ -253,6 +253,7 @@ Python 2.3.1 (#2, Sep 24 2003, 11:39:14)
 Type "help", "copyright", "credits" or "license" for more information.
 >>> [press Ctrl+D to exit]
 \end{lstlisting}
+\end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Installation de Python à partir du fichier source}\label{Installation de Python à partir du fichier source}
@@ -261,7 +262,7 @@ Si vous préférez installer à partir du fichier source, vous pouvez téléchar
 
 \subsection*{Installation à partir du fichier source}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 localhost:~# wget http://www.python.org/ftp/python/2.3/Python-2.3.tgz
@@ -308,7 +309,7 @@ Il faut comprendre une chose : Python mène une double vie. C'est un interpréte
 
 Lancez l'interface interactive de Python de la manière qui convient à la plate-forme et commençons la plongée par les étapes suivantes :
 
-\paragraph*{Exemple 1.5. Premiers pas dans l'interface interactive}
+\begin{example}[Premiers pas dans l'interface interactive]
 
 \begin{lstlisting}
 >>> 1 + 1               (1)
@@ -320,6 +321,7 @@ hello world
 >>> x + y
 3
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
     \item{L'interface interactive de Python peut évaluer une expression Python quelconque, y compris une expression arithmétique de base.}
