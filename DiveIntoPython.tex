@@ -1,0 +1,71 @@
+\documentclass[a4paper,french,11pt,twoside]{book}
+
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % encodage en utf8
+\usepackage{url} % permet l'utilisation des urls avec \url{}
+\usepackage[pdfborder=0]{hyperref} % permet les hyperliens dans la table des matières et les footnotes.
+\usepackage{fourier}
+\usepackage{fullpage}
+\usepackage{listings}
+\lstset{language=Python}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hypersetup{ % Modifiez la valeur des champs suivants
+    pdfauthor   = {Internet},%Auteurs
+    pdftitle    = {Dive into Python - version Française},%Titre du document
+    pdfsubject  = {Plongez au coeur de Python},%Sujet
+    pdfkeywords = {python},%
+    pdfproducer = {PDFLaTeX}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\noindent {\Huge Plongez au coeur de Python}
+
+\bigskip
+\noindent \textbf{Première version} : 11 février 2006
+
+\medskip
+\noindent Copyright (c) 2000, 2001, 2002, 2003, 2004 Mark \textsc{Pilgrim} \\ (\href{mailto:mark@diveintopython.org}{\textit{mark@diveintopython.org}})
+
+\medskip
+\noindent Copyright (c) 2001 Xavier \textsc{Defrang}\\(\href{mailto:xavier@defrang.com}{\textit{xavier@defrang.com}})
+
+\medskip
+\noindent Copyright (c) 2004 Jean-Pierre \textsc{Gay}\\(\href{mailto:python@kantoche.org}{\textit{python@kantoche.org}})
+
+\medskip
+\noindent Copyright (c) 2004, 2006 Alexandre \textsc{Drahon}\\(\href{mailto:python@adrahon.org}{\textit{python@adrahon.org}})
+
+\medskip
+Les évolutions de cet ouvrage (et de sa traduction française) sont disponibles sur le site \url{http://diveintopython.org/}. Si vous le lisez ailleurs, il est possible que vous ne disposiez pas de la dernière version.
+
+\medskip
+\noindent Permission vous est donnée de copier, distribuer et/ou modifier ce document selon les termes de la Licence GNU Free Documentation License, Version 1.1 ou ultérieure publiée par la Free Software Foundation, sans Sections Invariables, ni Textes de Première de Couverture, ni Textes de Quatrième de Couverture. Une copie de la licence est incluse en Annexe G, GNU Free Documentation License.
+
+\medskip
+\noindent Les programmes d'exemple de ce livre sont des logiciels libres, vous pouvez les redistribuer et/ou les modifier selon les termes de la licence Python publiée par la Python Software Foundation. Une copie de la licence est incluse en Annexe H, Python license.
+
+\bigskip
+\noindent \textbf{Version ~\LaTeX~}: Skhaen, quota\_atypique, Cynddl \\
+\href{mailto:skhaen@gmail.com}{\textit{skhaen@gmail.com}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\tableofcontents
+\newpage
+
+%CHAPITRES A INCLURE
+\include{chapitres/DIP_chapitre1}
+\include{chapitres/DIP_chapitre2}
+%\include{chapitres/DIP_chapitre}
+%\include{chapitres/DIP_chapitre}
+%\include{chapitres/DIP_chapitre}
+%\include{chapitres/DIP_chapitre}
+%\include{chapitres/DIP_chapitre}
+%\include{chapitres/DIP_chapitre}
+
+\end{document}
+
+
