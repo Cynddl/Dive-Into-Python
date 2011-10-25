@@ -3,18 +3,31 @@
 \usepackage[french]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc} % encodage en utf8
-\usepackage{url} % permet l'utilisation des urls avec \url{}
+\usepackage[hyphens]{url} % permet l'utilisation des urls avec \url{}
 \usepackage[pdfborder=0]{hyperref} % permet les hyperliens dans la table des matières et les footnotes.
 \usepackage{fourier}
 \usepackage{fullpage}
 
-\usepackage{color, listings,bera}
+\sloppy % évite le dépassement des urls dans les marges
+
+\usepackage{color, listings, bera}
 \definecolor{keywords}{RGB}{255,0,90}
 \definecolor{comments}{RGB}{60,179,113}
-\lstset{language=Python, basicstyle=\small\ttfamily, keywordstyle=\color{keywords}, commentstyle=\color{comments}\emph}
-\lstdefinestyle{none}{language={}, commentstyle={}}
-
-\usepackage{tocloft}
+\lstset{
+language=Python,
+xleftmargin=1cm, % indentation du bloc de code
+%numbers=left, numberstyle=\scriptsize,
+basicstyle=\small\ttfamily,
+keywordstyle=\color{keywords},
+commentstyle=\color{comments}\emph,
+breaklines=true, breakatwhitespace=true, % retour à la ligne activé
+postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow\space}}
+}
+\lstdefinestyle{none}{
+xleftmargin=0cm,
+language={},
+commentstyle={}
+}
 
 \newcounter{example}
 \newenvironment{example}[1][]{
