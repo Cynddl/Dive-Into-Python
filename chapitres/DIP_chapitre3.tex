@@ -1,0 +1,848 @@
+\chapter{Types prédéfinis}\label{Types prédéfinis}
+% Chapitre 3
+
+Avant de revenir à votre premier programme Python, une petite digression est de rigueur, car vous devez absolument connaître les dictionnaires, les tuples et les listes (tout ça !). Si vous être un programmeur Perl, vous pouvez probablement passer rapidement sur les points concernant les dictionnaires et les listes, mais vous devrez quand même faire attention aux tuples.
+
+\section{Présentation des dictionnaires}\label{Présentation des dictionnaires}
+
+Un des types de données fondamentaux de Python est le dictionnaire, qui définit une relation 1 à 1 entre des clés et des valeurs.
+
+\note{Python vs. Perl: les dictionnaires}{
+En Python, un dictionnaire est comme une table de hachage en Perl. En Perl, les variables qui stockent des tables de hachage débutent toujours par le caractère \emph{\%}. En Python vous pouvez nommer votre variable comme bon vous semble et Python se chargera de la gestion du typage.}
+
+\note{Python vs. Java: les dictionnaires}{
+Un dictionnaire Python est similaire à une instance de la classe \emph{Hashtable} en Java.}
+
+\note{Python vs. Visual Basic: les dictionnaires}{
+Un dictionnaire Python est similaire à une instance de l'objet \emph{Scripting.Dictionnary} en Visual Basic.}
+
+\subsection{Définition des dictionnaires}
+
+\begin{example}[Définition d'un dictionnaire]
+\begin{lstlisting}
+>>> d = {"server":"mpilgrim", "database":"master"} (1)
+>>> d
+{'server': 'mpilgrim', 'database': 'master'}
+>>> d["server"]                                    (2)
+'mpilgrim'
+>>> d["database"]                                  (3)
+'master'
+>>> d["mpilgrim"]                                  (4)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+KeyError: mpilgrim
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{D'abord, nous créons un nouveau dictionnaire avec deux éléments que nous assignons à la variable \emph{d}. Chaque élément est une paire clé-valeur et l'ensemble complet des éléments est entouré d'accolades.}
+\item{\emph{'server'} est une clé et sa valeur associée, référencée par \emph{d["server"]}, est \emph{'mpilgrim'}.}
+\item{\emph{'database'} est une clé et sa valeur associée, référencée par \emph{d["database"]}, est \emph{'master'}.}
+\item{Vous pouvez obtenir les valeurs par clé, mais pas les clés à partir de leur valeur. Donc \emph{d["server"]} est \emph{'mpilgrim'}, mais \emph{d["mpilgrim"]} déclenche une exception, car \emph{'mpilgrim'} n'est pas une clé.}
+\end{enumerate}
+
+\subsection{Modification des dictionnaires}
+
+\begin{example}[Modification d'un dictionnaire]
+\begin{lstlisting}
+>>> d
+{'server': 'mpilgrim', 'database': 'master'}
+>>> d["database"] = "pubs" (1)
+>>> d
+{'server': 'mpilgrim', 'database': 'pubs'}
+>>> d["uid"] = "sa"        (2)
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'pubs'}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Vous ne pouvez pas avoir de clés dupliquées dans un dictionnaire. L'assignation d'une valeur à une clé existante a pour effet d'effacer l'ancienne valeur.}
+\item{Vous pouvez ajouter de nouvelles paires clé-valeur à tout moment. La syntaxe est identique à celle utilisée pour modifier les valeurs existantes. (Oui, cela vous posera problème si vous essayez d'ajouter de nouvelles valeurs alors que vous ne faites que modifier constamment la même valeur parce que votre clé n'a pas changé de la manière que vous espériez)}
+\end{enumerate}
+
+Notez que le nouvel élément (clé \emph{'uid'}, valeur \emph{'sa'}) à l'air d'être au milieu. En fait c'est par coïncidence que les éléments avaient l'air d'être dans l'ordre dans le premier exemple, c'est tout autant une coïncidence qu'ils aient l'air dans le désordre maintenant.
+
+\note{Les dictionnaires ne sont pas ordonnés}{
+Les dictionnaires ne sont liés à aucun concept d'ordonnancement des éléments. Il est incorrect de dire que les éléments sont «~dans le désordre~», ils ne sont tout simplement pas ordonnés. C'est une distinction importante qui vous ennuiera lorsque vous souhaiterez accéder aux éléments d'un dictionnaire d'une façon spécifique et reproductible (par exemple par ordre alphabétique des clés). C'est possible, mais cette fonctionnalité n'est pas intégrée au dictionnaire.}
+
+Quand vous utilisez des dictionnaires, vous devez garder à l'esprit le fait que les clés sont sensibles à la casse.
+
+\begin{example}[Les clés des dictionnaires sont sensibles à la casse]
+\begin{lstlisting}
+>>> d = {}
+>>> d["key"] = "value"
+>>> d["key"] = "other value" (1)
+>>> d
+{'key': 'other value'}
+>>> d["Key"] = "third value" (2)
+>>> d
+{'Key': 'third value', 'key': 'other value'}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Assigner une valeur a une clé existante remplace l'ancienne valeur par la nouvelle.}
+\item{Ici la valeur n'est pas assignée à une clé existante parce que les chaînes en Python sont sensibles à la casse, donc \emph{'key'} n'est pas la même chose que \emph{'Key'}. Une nouvelle paire clé/valeur est donc créée dans le dictionnaire, elle peut vous sembler similaire à la précédente, mais pour Python elle est complètement différente.}
+\end{enumerate}
+
+\begin{example}[Mélange de types de données dans un dictionnaire]
+\begin{lstlisting}
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'pubs'}
+>>> d["retrycount"] = 3 (1)
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'master', 'retrycount': 3}
+>>> d[42] = "douglas"   (2)
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'master',
+42: 'douglas', 'retrycount': 3}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Les dictionnaires ne servent pas uniquement aux chaînes de caractères. Les valeurs d'un dictionnaire peuvent être de n'importe quel type de données, y compris des chaînes, des entiers, des objets et même d'autres dictionnaires. Au sein d'un même dictionnaire, les valeurs ne sont pas forcément d'un même type, vous pouvez les mélanger à votre guise.}
+\item{Les clés d'un dictionnaire sont plus restrictives, mais elles peuvent être des chaînes, des entiers et de quelques autres types encore (nous verrons cela en détail plus tard). Vous pouvez également mélanger divers types de données au sein des clés d'un dictionnaire.}
+\end{enumerate}
+
+\subsection{Enlever des éléments d'un dictionnaire}
+
+\begin{example}[Enlever des éléments d'un dictionnaire]
+\begin{lstlisting}
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'master',
+42: 'douglas', 'retrycount': 3}
+>>> del d[42] (1)
+>>> d
+{'server': 'mpilgrim', 'uid': 'sa', 'database': 'master', 'retrycount': 3}
+>>> d.clear() (2)
+>>> d
+{}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{L'instruction \emph{del} vous permet d'effacer des éléments d'un dictionnaire en fonction de leur clé.}
+\item{La méthode \emph{clear} efface tous les éléments d'un dictionnaire. Notez que l'ensemble fait d'accolades vides signifie un dictionnaire sans éléments.}
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur les dictionnaires}
+\begin{itemize}
+\item{\emph{How to Think Like a Computer Scientist}\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/}} explique comment utiliser les dictionnaires pour modéliser les matrices creuses\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/chap10.htm}}.}
+\item{La \emph{Python Knowledge Base}\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/199/}} a de nombreux exemples de code ayant recours aux dictionnaires\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/541}}.}
+\item{Le \emph{Python Cookbook}\footnote{\url{http://www.activestate.com/ASPN/Python/Cookbook/}} explique comment trier les valeurs d'un dictionnaire par leurs clés\footnote{\url{http://www.activestate.com/ASPN/Python/Cookbook/Recipe/52306}}.}
+\item{La \emph{Python Library Reference}\footnote{\url{http://www.python.org/doc/current/lib/}} résume toutes les méthodes des dictionnaires\footnote{\url{http://www.python.org/doc/current/lib/typesmapping.html}}.}
+\end{itemize}
+
+\section{Présentation des listes}\label{Présentation des listes}
+
+Les listes sont le type de données à tout faire de Python. Si votre seule expérience des listes se limite à l'utilisation des tableaux de Visual Basic ou -- à Dieu ne plaise -- les datastores de Powerbuilder, accrochez-vous pour les listes Python.
+
+\note{Python vs. Perl : listes}{
+Une liste en Python est comme un tableau Perl. En Perl, les variables qui stockent des tableaux débutent toujours par le caractère \emph{@}, en Python vous pouvez nommer votre variable comme bon vous semble et Python se chargera de la gestion du typage.}
+
+\note{Python vs. Java : listes}{
+Une liste Python est bien plus qu'un tableau en Java (même s'il peut être utilisé comme tel si vous n'attendez vraiment rien de mieux de la vie). Une meilleure analogie serait la classe \emph{ArrayList}, qui peut contenir n'importe quels objets et qui croît dynamiquement au fur et à mesure que de nouveaux éléments y sont ajoutés.}
+
+\subsection{Définition d'une liste}
+
+\begin{example}[Definition d'une liste]
+\begin{lstlisting}
+>>> li = ["a", "b", "mpilgrim", "z", "example"] (1)
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example']
+>>> li[0]                                       (2)
+'a'
+>>> li[4]                                       (3)
+'example'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Premièrement, nous définissons une liste de 5 éléments. Notez qu'ils conservent leur ordre d'origine. Ce n'est pas un accident. Une liste est un ensemble ordonné d'éléments entouré par des crochets.}
+\item{Une liste peut être utilisée comme un tableau dont l'indice de base est zéro. Le premier élément de toute liste non vide est toujours \emph{li[0]}.}
+\item{Le dernier élément de cette liste de 5 éléments est \emph{li[4]}, car les listes sont toujours indicées à partir de zéro.}
+\end{enumerate}
+
+\begin{example}[Indices de liste négatifs]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example']
+>>> li[-1] (1)
+'example'
+>>> li[-3] (2)
+'mpilgrim'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Un indice négatif permet d'accéder aux éléments à partir de la fin de la liste en comptant à rebours. Le dernier élément de toute liste non vide est toujours \emph{li[-1]}.}
+\item{Si vous trouvez que les indices négatifs prêtent à confusion, voyez-les comme suit : \emph{li[n] == li[n - len(li)]}. Donc dans cette liste, \emph{li[-3] == li[5 - 3] == li[2]}.}
+\end{enumerate}
+
+\begin{example}[Découpage d'une liste]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example']
+>>> li[1:3]  (1)
+['b', 'mpilgrim']
+>>> li[1:-1] (2)
+['b', 'mpilgrim', 'z']
+>>> li[0:3]  (3)
+['a', 'b', 'mpilgrim']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Vous pouvez obtenir un sous-ensemble d'une liste, appelé une « tranche » (\emph{slice}), en spécifiant deux indices. La valeur de retour est une nouvelle liste contenant les éléments de la liste, dans l'ordre, en démarrant du premier indice de la tranche (dans ce cas \emph{li[1]}), jusqu'à au second indice de la tranche non inclu (ici \emph{li[3]}).}
+\item{Le découpage fonctionne si un ou les deux indices sont négatifs. Pour vous aider, vous pouvez les voir comme ceci : en lisant la liste de gauche à droite, le premier indice spécifie le premier élément que vous désirez et le second indice spécifie le premier élément dont vous ne voulez pas. La valeur de retour est tout ce qui se trouve entre les deux.}
+\item{Les listes sont indicées à partir de zéro, donc \emph{li[0:3]} retourne les trois premiers éléments de la liste, en démarrant à \emph{li[0]} jusqu'à \emph{li[3]} non inclu.}
+\end{enumerate}
+
+\begin{example}[Raccourci pour le découpage]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example']
+>>> li[:3] (1)
+['a', 'b', 'mpilgrim']
+>>> li[3:] (2) (3)
+['z', 'example']
+>>> li[:]  (4)
+['a', 'b', 'mpilgrim', 'z', 'example']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Si l'indice de tranche de gauche est 0, vous pouvez l'omettre et 0 sera implicite. Donc \emph{li[:3]} est la même chose que \emph{li[0:3]} dans le premier exemple.}
+\item{De la même manière, si l'indice de tranche de droite est la longueur de la liste, vous pouvez l'omettre. Donc \emph{li[3:]} est pareil que \emph{li[3:5]}, puisque la liste a 5 éléments.}
+\item{Remarquez la symétrie. Dans cette liste de 5 éléments, \emph{li[:3]} retourne les 3 premiers éléments et \emph{li[3:]} retourne les deux derniers. En fait \emph{li[:n]} retournera toujours les n premiers éléments et \emph{li[n:]} le reste, quelle que soit la longueur de la liste.}
+\item{Si les deux indices sont omis, tous les éléments de la liste sont inclus dans la tranche. Mais ce n'est pas la même chose que la liste \emph{li} ; c'est une nouvelle liste qui contient les mêmes éléments. \emph{li[:]} est un raccourci permettant d'effectuer une copie complète de la liste.}
+\end{enumerate}
+
+\subsection{Ajout d'éléments à une liste}
+
+\begin{example}[Ajout d'éléments à une liste]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example']
+>>> li.append("new")               (1)
+>>> li
+['a', 'b', 'mpilgrim', 'z', 'example', 'new']
+>>> li.insert(2, "new")            (2)
+>>> li
+['a', 'b', 'new', 'mpilgrim', 'z', 'example', 'new']
+>>> li.extend(["two", "elements"]) (3)
+>>> li
+['a', 'b', 'new', 'mpilgrim', 'z', 'example', 'new', 'two', 'elements']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{\emph{append} ajoute un élément à la fin de la liste.}
+\item{\emph{insert} insère un élément dans la liste. L'argument numérique est l'indice du premier élément qui sera décalé. Notez que les éléments de la liste ne sont pas obligatoirement uniques ; il y a maintenant 2 éléments distincts avec la valeur \emph{'new'},  \emph{li[2]} and  \emph{li[6]}.}
+\item{\emph{extend} concatène des listes. Notez que vous n'appelez pas \emph{extend} avec plusieurs arguments, mais bien avec un seul argument qui est une liste. Dans le cas présent, la liste est composée de deux éléments.}
+\end{enumerate}
+
+\begin{example}[Différence entre extend et append]
+\begin{lstlisting}
+>>> li = ['a', 'b', 'c']
+>>> li.extend(['d', 'e', 'f']) (1)
+>>> li
+['a', 'b', 'c', 'd', 'e', 'f']
+>>> len(li)                    (2)
+6
+>>> li[-1]
+'f'
+>>> li = ['a', 'b', 'c']
+>>> li.append(['d', 'e', 'f']) (3)
+>>> li
+['a', 'b', 'c', ['d', 'e', 'f']]
+>>> len(li)                    (4)
+4
+>>> li[-1]
+['d', 'e', 'f']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item {Les listes ont deux méthodes, \emph{extend} et \emph{append}, qui semblent faire la même chose, mais sont en fait complètement différentes. \emph{extend} prend un seul argument, qui est toujours une liste et ajoute chacun des éléments de cette liste à la liste originelle.}
+\item {Ici nous avons une liste de trois éléments (\emph{'a'}, \emph{'b'} et \emph{'c'}) et nous utilisons \emph{extended} pour lui ajouter une liste de trois autres éléments (\emph{'d'}, \emph{'e'} et \emph{'f'}), ce qui nous donne une liste de six éléments.}
+\item {Par contre, \emph{append} prend un argument, qui peut être de n'importe quel type et l'ajoute simplement à la fin de la liste. Ici, nous appelons \emph{append} avec un argument, qui est une liste de trois éléments.}
+\item {Maintenant, la liste originelle qui avait trois éléments en contient quatre. Pourquoi quatre ? Parce que le dernier élément que nous venons d'ajouter est lui-même une liste. Les listes peuvent contenir n'importe quel type de données, y compris d'autres listes. En fonction du but recherché, faites attention de ne pas utiliser \emph{append} si vous pensez en fait à \emph{extend}.}
+\end{enumerate}
+
+\subsection{Recherche dans une liste}
+
+\begin{example}[Recherche dans une liste]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'new', 'mpilgrim', 'z', 'example', 'new', 'two', 'elements']
+>>> li.index("example") (1)
+5
+>>> li.index("new")     (2)
+2
+>>> li.index("c")       (3)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+ValueError: list.index(x): x not in list
+>>> "c" in li           (4)
+False
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{\emph{index} trouve la première occurrence d'une valeur dans la liste et retourne son indice.}
+\item{\emph{index} trouve la première occurrence d'une valeur dans la liste. Dans ce cas, \emph{new} apparaît à deux reprises dans la liste, \emph{li[2]} et \emph{li[6]}, mais \emph{index} ne retourne que le premier indice, 2.}
+\item{Si la valeur est introuvable dans la liste, Python déclenche une exception.C'est sensiblement différent de la plupart des autres langages qui retournent un indice invalide. Si cela peut sembler gênant, c'est en fait une bonne chose, car cela signifie que votre programme se plantera à la source même du problème plutôt qu'au moment où vous tenterez de manipuler l'indice non valide.}
+\item{Pour tester la présence d'une valeur dans la liste, utilisez \emph{in}, qui retourne \emph{True} si la valeur a été trouvée et \emph{False} dans le cas contraire.}
+\end{enumerate}
+
+\note{Qu'est-ce qui est vrai en Python ?}{
+Avant la version 2.2.1, Python n'avait pas de type booléen. Pour compenser cela, Python acceptait pratiquement n'importe quoi dans un contexte requérant un booléen (comme une instruction \emph{if}), en fonction des règles suivantes :
+\begin{itemize}
+\item{0 est faux, tous les autres nombres sont vrais ;}
+\item{une chaîne vide (\emph{""}) est faux, toutes les autres chaînes sont vrai ;}
+\item{une liste vide (\emph{[]}) est faux, toutes les autres listes sont vrai ;}
+\item{un tuple vide (\emph{()}) est faux, tous les autres tuples sont vrai ;}
+\item{un dictionnaire vide (\emph{\{\}}) est faux, tous les autres dictionnaires sont vrai.}
+\end{itemize}   
+Ces règles sont toujours valides en Python 2.3.3 et au-delà, mais vous pouvez maintenant utiliser un véritable booléen, qui a pour valeur \emph{True} ou \emph{False}. Notez la majuscule, ces valeurs comme tout le reste en Python, sont sensibles à la casse.}
+
+\subsection{Suppression d'éléments d'une liste}
+
+\begin{example}[Enlever des éléments d'une liste]
+\begin{lstlisting}
+>>> li
+['a', 'b', 'new', 'mpilgrim', 'z', 'example', 'new', 'two', 'elements']
+>>> li.remove("z")   (1)
+>>> li
+['a', 'b', 'new', 'mpilgrim', 'example', 'new', 'two', 'elements']
+>>> li.remove("new") (2)
+>>> li
+['a', 'b', 'mpilgrim', 'example', 'new', 'two', 'elements']
+>>> li.remove("c")   (3)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+ValueError: list.remove(x): x not in list
+>>> li.pop()         (4)
+'elements'
+>>> li
+['a', 'b', 'mpilgrim', 'example', 'new', 'two']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{\emph{remove} enlève la première occurrence de la valeur de la liste.}
+\item{\emph{remove} enlève uniquement la première occurence de la valeur. Dans ce cas, new apparaît à deux reprises dans la liste, mais \emph{li.remove("new")} a seulement retiré la première occurrence.}
+\item{Si la valeur est introuvable dans la liste, Python déclenche une exception. Ce comportement est identique à celui de la méthode \emph{index}.}
+\item{\emph{pop} est un spécimen intéressant. Il fait deux choses : il enlève le dernier élément de la liste et il retourne la valeur qui a été enlevée. Notez que cela diffère de \emph{li[-1]} qui retourne une valeur, mais ne modifie pas la liste  et de \emph{li.remove(valeur)} qui altère la liste, mais ne retourne pas de valeur.}
+\end{enumerate}
+
+\subsection{Utilisation des opérateurs de listes}
+
+\begin{example}[Opérateurs de listes]
+\begin{lstlisting}
+>>> li = ['a', 'b', 'mpilgrim']
+>>> li = li + ['example', 'new'] (1)
+>>> li
+['a', 'b', 'mpilgrim', 'example', 'new']
+>>> li += ['two']                (2)
+>>> li
+['a', 'b', 'mpilgrim', 'example', 'new', 'two']
+>>> li = [1, 2] * 3              (3)
+>>> li
+[1, 2, 1, 2, 1, 2]
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Les listes peuvent être concaténées à l'aide de l'opérateur \emph{+.} \emph{liste = liste + autreliste} est équivalent à \emph{list.extend(autreliste)}. Mais l'opérateur \emph{+} retourne une nouvelle liste concaténée comme une valeur alors que \emph{extend} modifie une liste existante. Cela implique que \emph{extend} est plus rapide, surtout pour de grandes listes.}
+\item{Python supporte l'opérateur \emph{+=. li += ['two']} est équivalent à li = li + ['two']. L'opérateur \emph{+=} fonctionne pour les listes, les chaînes et les entiers. Il peut être surchargé pour fonctionner également avec des classes définies par l'utilisateur (nous en apprendrons plus sur les classes au chapitre 5).}
+\item{L'opérateur \emph{*} agit sur les liste comme un répéteur. \emph{li = [1, 2] * 3} est équivalent à \emph{li = [1, 2] + [1, 2] + [1, 2]}, qui concatène les trois listes en une seule.}
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur les listes}
+\begin{itemize}
+\item{How to Think Like a Computer Scientist\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/}} explique les listes et expose le sujet important du passage de listes comme arguments de fonction \footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/chap08.htm}}.}
+\item{Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} montre comment utiliser des listes comme des piles ou des files\footnote{\url{http://www.python.org/doc/current/tut/node7.html\#SECTION007110000000000000000}}.}
+\item{La Python Knowledge Base\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/199/}} répond aux questions courantes à propos des listes\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/534}} et fourni de nombreux exemples de code utilisant des listes\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/540}}.}
+\item{La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} résume toutes les méthodes des listes\footnote{\url{http://www.python.org/doc/current/lib/typesseq-mutable.html}}.}
+\end{itemize}
+
+
+\section{Présentation des tuples}
+
+Un tuple (n-uplet) est une liste non-mutable. Une fois créé, un tuple ne peut en
+aucune manière être modifié.
+
+\begin{example}[Définition d'un tuple]
+\begin{lstlisting}
+>>> t = ("a", "b", "mpilgrim", "z", "example") (1)
+>>> t
+('a', 'b', 'mpilgrim', 'z', 'example')
+>>> t[0]                                       (2)
+'a'
+>>> t[-1]                                      (3)
+'example'
+>>> t[1:3]                                     (4)
+('b', 'mpilgrim')
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Un tuple est défini de la même manière qu'une liste sauf que l'ensemble d'éléments est entouré de parenthèses plutôt que de crochets.}
+\item{Les éléments d'un tuple ont un ordre défini, tout comme ceux d'une liste.  Les indices de tuples débutent à zéro, tout comme ceux d'une liste, le  premier élément d'un tuple non vide est toujours \emph{t[0]}.Les indices négatifs comptent à partir du dernier élément du tuple, tout  comme pour une liste.}
+\item{Le découpage fonctionne aussi, tout comme pour une liste. Notez que lorsque  vous découpez une liste, vous obtenez une nouvelle liste, lorsque vous découpez un tuple, vous obtenez un nouveau tuple.}
+\end{enumerate}
+
+\begin{example}[Les tuples n'ont pas de méthodes]
+\begin{lstlisting}
+>>> t
+('a', 'b', 'mpilgrim', 'z', 'example')
+>>> t.append("new")    (1)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+AttributeError: 'tuple' object has no attribute 'append'
+>>> t.remove("z")      (2)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+AttributeError: 'tuple' object has no attribute 'remove'
+>>> t.index("example") (3)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+AttributeError: 'tuple' object has no attribute 'index'
+>>> "z" in t           (4)
+True
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Vous ne pouvez pas ajouter d'élément à un tuple. Les tuples n'ont pas de méthodes \emph{append} ou \emph{extend}.}
+\item{Vous ne pouvez pas enlever d'éléments d'un tuple. Les tuples n'ont pas de méthodes \emph{remove} ou \emph{pop}.}
+\item{Vous ne pouvez pas rechercher d'éléments dans un tuple. Les tuples n'ont pas de méthode \emph{index}.}
+\item{Vous pouvez toutefois utiliser \emph{in} pour vérifier l'existence d'un élément dans un tuple.}
+\end{enumerate}
+
+Mais à quoi servent donc les tuples ?
+
+\begin{itemize}
+\item {Les tuples sont plus rapides que les listes. Si vous définissez un ensemble constant de valeurs et que tout ce que vous allez faire est le parcourir, utilisez un tuple au lieu d'une liste.}
+\item {Votre code est plus sûr si vous «~protégez en écriture~» les données qui n'ont pas besoin d'être modifiées. Utiliser un tuple à la place d'une liste revient à avoir une assertion implicite que les données sont constantes et que des mesures spécifiques sont nécéssaires pour modifier cette définition.}
+\item{Vous vous souvenez que j'avais dit que que les clés de dictionnaire pouvaient être des entiers, des chaînes et «~quelques autres types~» ? Les tuples sont un de ces types. Ils peuvent être utilisé comme clé dans un dictionnaire, ce qui n'est pas le cas des listes. En fait, c'est plus compliqué que ça. Les clés de dictionnaire doivent être non-mutables. Les tuples sont non-mutables mais si vous avez un tuple contenant des listes, il est considéré comme mutable et n'est pas utilisable comme clé de dictionnaire. Seuls les tuples de chaînes, de nombres ou d'autres tuples utilisable comme clé peuvent être utilisés comme clé de dictionnaire.}
+\item{Les tuples sont utilisés pour le formatage de chaînes, comme nous le verrons bientôt.}
+\end{itemize}
+
+\note{De tuple à liste à tuple}{
+Les tuples peuvent être convertis en listes et vice-versa. La fonction prédéfinie \emph{tuple} prend une liste et retourne un tuple contenant les mêmes éléments et la fonction list prend un tuple et retourne une liste. En fait, \emph{tuple} gèle une liste et \emph{list} dégèle un tuple.}
+
+\paragraph{Pour en savoir plus sur les tuples}
+\begin{itemize}
+\item{How to Think Like a Computer Scientist\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/}} explique les tuples et montre comment concaténer des tuples\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/chap10.htm}}.}
+\item{La Python Knowledge Base\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/199/}} vous apprendra à trier un tuple\footnote{\url{http://www.faqts.com/knowledge-base/view.phtml/aid/4553/fid/587}}.}
+\item{Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} explique comment définir un tuple avec un seul élément\footnote{\url{http://www.python.org/doc/current/tut/node7.html\#SECTION007300000000000000000}}.}
+\end{itemize}
+
+\section{Définitions de variables}
+
+Maintenant que vous pensez tout savoir à propos des dictionnaires, des tuples et des listes (hum!), revenons à notre programme d'exemple du Chapitre 2, \emph{odbchelper.py}.
+
+Python dispose de variables locales et globales comme la plupart des autres langages, mais il n'a pas de déclaration explicite des variables. Les variables viennent au monde en se voyant assigner une valeur et sont automatiquement détruites lorsqu'elles se retrouvent hors de portée.
+
+\begin{example}[Définition de la variable myParams]
+\begin{lstlisting}
+if __name__ == "__main__":
+    myParams = {"server":"mpilgrim", \
+                "database":"master", \
+                "uid":"sa", \
+                "pwd":"secret" \
+                }
+\end{lstlisting}
+\end{example}
+
+Il y a plusieurs points intéressants ici. Tout d'abord, notez l'indentation. Une instruction \emph{if} est un bloc de code et nécessite d'être indenté tout comme une fonction.
+
+Deuxièmement, l'assignation de variable est une commande étalée sur plusieurs lignes avec une barre oblique («~\textbackslash~») servant de marque de continuation de ligne.
+
+\note{Commandes multilignes}{
+Lorsqu'une commande est étalée sur plusieurs lignes avec le marqueur de continuation de ligne («~\textbackslash~»), les lignes suivantes peuvent être indentées de n'importe qu'elle manière, les règles d'indentation strictes habituellement utilisées en Python ne s'appliquent pas. Si votre IDE Python indente automatiquement les lignes continuées, vous devriez accepter ses réglages par défauts sauf raison impérative.}
+
+Les expressions entre parenthèses, crochets ou accolades (comme la définition d'un dictionnaire) peuvent être réparties sur plusieurs lignes avec ou sans le caractère de continuation («~\textbackslash~»). Je préfère inclure la barre oblique même
+lorsqu'elle n'est pas requise, car je pense que cela rends le code plus lisible, mais c'est une question de style.
+
+Troisièmement, vous n'avez jamais déclaré la variable \emph{myParams}, vous lui avez simplement assigné une valeur. C'est comme en VBScript sans l'option option \emph{explicit}. Heureusement, à l'inverse de VBScript, Python ne permet pas de référencer une variable à laquelle aucune valeur n'a été assigné. Tenter de le faire déclenchera une exception.
+
+\subsection{Référencer des variables}
+
+\begin{example}[Référencer une variable non assignée]
+\begin{lstlisting}
+>>> x
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+NameError: There is no variable named 'x'
+>>> x = 1
+>>> x
+1
+\end{lstlisting}
+\end{example}
+
+Un jour, vous remercierez Python pour ça.
+
+\subsection{Assignation simultanée de plusieurs valeurs}
+
+Un des raccourcis les plus réjouissants existant en Python est l'utilisation de séquences pour assigner plusieurs valeurs en une fois.
+
+\begin{example}[Assignation simultanée de plusieurs valeurs]
+\begin{lstlisting}
+>>> v = ('a', 'b', 'e')
+>>> (x, y, z) = v     (1)
+>>> x
+'a'
+>>> y
+'b'
+>>> z
+'e'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item {\emph{v} est un tuple de trois éléments et \emph{(x, y, z)} est un tuple de trois variables. Le fait d'assigner l'un à l'autre assigne chacune des valeurs de v a chacune des variables, dans leur ordre respectif.}
+\end{enumerate}
+
+Ce type d'assignation a de multiples usages. Je souhaite souvent assigner des noms a une série de valeurs. En C, vous utiliseriez \emph{enum} et vous listeriez manuellement chaque constante et la valeur associée, ce qui semble particulièrement fastidieux lorsque les valeurs sont consécutives. En Python, vous pouvez utiliser la fonction prédéfinie range avec l'assignation multiple de variables pour assigner rapidement des valeurs consécutives.
+
+\begin{example}[Assignation de valeurs consécutives]
+\begin{lstlisting}
+>>> range(7)                                                                    (1)
+[0, 1, 2, 3, 4, 5, 6]
+>>> (MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) = range(7)(2)
+>>> MONDAY                                                                      (3)
+0
+>>> TUESDAY
+1
+>>> SUNDAY
+6
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{La fonction prédéfinie \emph{range} retourne une liste d'entiers. Dans sa forme la plus simple, elle prend une borne supérieure et retourne une séquence démarrant à 0, mais n'incluant pas la borne supérieure. (Si vous le souhaitez, vous pouvez spécifier une borne inférieure différente de 0 ou un pas d'incrément différent de 1. Vous pouvez faire un \emph{print range.\_\_doc\_\_} pour de plus amples détails.)}
+\item{MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY et SUNDAY sont les variables que nous définissons (cet exemple provient du module \emph{calendar}, qui est un petit module amusant qui affiche des calendriers comme le programme cal sous UNIX. Le module \emph{calendar} définit des constantes entières pour les jours de la semaine).}
+\item{À présent, chaque variable possède sa valeur : MONDAY vaut 0, TUESDAY vaut 1 et ainsi de suite.}
+\end{enumerate}
+
+Vous pouvez aussi utiliser l'assignation multiple pour créer des fonctions qui retournent plusieurs valeurs, simplement en retournant un tuple contenant ces valeurs. L'appelant peut le traiter en tant que tuple ou assigner les valeurs à différentes variables. Beaucoup de bibliothèques standard de Python font cela, y compris le module os dont nous traiterons au Chapitre 6.
+
+\paragraph{Pour en savoir plus sur les variables}
+\begin{itemize}
+\item{Le Python Reference Manual\footnote{\url{http://www.python.org/doc/current/ref/}} présente des exemples des cas où vous pouvez omettre le marqueur de continuation\footnote{\url{http://www.python.org/doc/current/ref/implicit-joining.html}} et où vous devez l'utiliser\footnote{\url{http://www.python.org/doc/current/ref/explicit-joining.html}}.}
+\item{How to Think Like a Computer Scientist\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/}} montre comment utiliser l'assignation multiple pour échanger les valeurs de deux variables\footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/chap09.htm}}.}
+\end{itemize}
+
+\section{Formatage de chaînes}
+
+Python supporte le formatage de valeurs en chaînes de caractères. Bien que cela peut comprendre des expression très compliquées, l'usage le plus simple consiste à insérer des valeurs dans des chaînes à l'aide de marques \emph{\%s}.
+
+\note{Python vs. C : formatage de chaînes}{
+Le formatage de chaînes en Python utilise la même syntaxe que la fonction C \emph{sprintf}.}
+
+\begin{example}[Présentation du formatage de chaînes]
+\begin{lstlisting}
+>>> k = "uid"
+>>> v = "sa"
+>>> "%s=%s" % (k, v) (1)
+'uid=sa'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item L'expression entière est évaluée en chaîne. Le premier \emph{\%s} est remplacé par la valeur de k, le second \emph{\%s} est remplacé par la valeur de \emph{v}. Tous les autres caractères de la chaîne (le signe d'égalité dans le cas présent) restent tels quels.
+\end{enumerate}
+
+Notez que \emph{(k, v)} est un tuple. Je vous avais dit qu'ils servaient à quelque chose.
+
+Vous pourriez pensez que cela représente beaucoup d'efforts pour le formatage de chaîne se bornait à la concaténation. Il n'y est pas question uniquement de formatage mais également de conversion de types.
+
+\begin{example}[Formatage de chaîne et concaténation]
+\begin{lstlisting}
+>>> uid = "sa"
+>>> pwd = "secret"
+>>> print pwd + " is not a good password for " + uid      (1)
+secret is not a good password for sa
+>>> print "%s is not a good password for %s" % (pwd, uid) (2)
+secret is not a good password for sa
+>>> userCount = 6
+>>> print "Users connected: %d" % (userCount, )           (3) (4)
+Users connected: 6
+>>> print "Users connected: " + userCount                 (5)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+TypeError: cannot concatenate 'str' and 'int' objects
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item + est l'opérateur de concaténation de chaînes.
+\item Dans ce cas trivial, le formatage de chaînes mène au même résultat que la
+    concaténation.
+\item \emph{(userCount, )} est un tuple contenant un seul élément. Oui, la syntaxe est
+    un peu étrange mais il y a un excellente raison : c'est un tuple sans aucune
+    ambiguité. En fait, vous pouvez toujours mettre une virgule après
+    l'élément terminal lors de la définition d'une liste, d'un tuple ou d'un
+    dictionnaire mais cette virgule est obligatoire lors de la définition d'un
+    tuple avec un élément unique. Si ce n'était pas le cas, Python ne pourrait
+    distinguer si \emph{(userCount)} est un tuple avec un seul élément ou juste la
+    valeur \emph{userCount}.
+\item Le formatage de chaîne fonctionne également avec des entiers en spécifiant
+    \emph{\%d} au lieu de \emph{\%s}.
+\item Si vous tentez de concaténer une chaîne avec un autre type, Python va
+    déclencher une exception. Au contraire du formatage de chaîne, la
+    concaténation ne fonctionne que si tout les objets sont déjà de type
+    chaîne.
+\end{enumerate}
+
+Comme la fonction printf en C, le formatage de chaînes en Python est un véritable couteau suisse. Il y a des options à profusion et des modificateurs de format spécifiques pour de nombreux types de valeurs.
+
+\begin{example}[Formatage de nombres]
+\begin{lstlisting}
+>>> print "Today's stock price: %f" % 50.4625   (1)
+50.462500
+>>> print "Today's stock price: %.2f" % 50.4625 (2)
+50.46
+>>> print "Change since yesterday: %+.2f" % 1.5 (3)
++1.50
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item L'option de formatage \emph{\%f} considère la valeur comme un nombre décimal et
+    l'affiche avec six chiffres après la virgule.
+\item Le modificateurs ".2" de l'option \emph{\%f} tronque la valeur à deux chiffres
+    après la virgule.
+\item On peut également combiner les modificateurs. Ajouter le modificateur +
+    affiche le signe positif ou négatif avant la valeur. Notez que le
+    modificateur ".2" est toujours en place et qu'il formate la valeur avec
+    exactement deux chiffres après la virgule.
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur le formatage de liste}
+\begin{itemize}
+\item{La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} résume
+    tous les caractères spéciaux utilisés pour le formatage de chaînes\footnote{\url{http://www.python.org/doc/current/lib/typesseq-strings.html}}.}
+\item{Effective AWK Programming \footnote{\url{http://www-gnats.gnu.org:8080/cgi-bin/info2www?(gawk)Top}} explique tous les caractères de formatage\footnote{\url{http://www-gnats.gnu.org:8080/cgi-bin/info2www?(gawk)Control+Letters}} et des technique de formatage avancées comme le réglage de la largeur ou de la précision et le remplissage avec des zéros\footnote{\url{http://www-gnats.gnu.org:8080/cgi-bin/info2www?(gawk)Format+Modifiers}}.}
+\end{itemize}
+
+\section{Mutation de listes}
+
+Une des caractéristiques les plus puissantes de Python est la \emph{list comprehension} (création fonctionnelle de listes) qui fournit un moyen concis d'appliquer une fonction sur chaque élément d'une liste afin d'en produire une nouvelle.
+
+\begin{example}[Présentation des \emph{list comprehensions}]
+\begin{lstlisting}
+>>> li = [1, 9, 8, 4]
+>>> [elem*2 for elem in li]      (1)
+[2, 18, 16, 8]
+>>> li                           (2)
+[1, 9, 8, 4]
+>>> li = [elem*2 for elem in li] (3)
+>>> li
+[2, 18, 16, 8]
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item Pour comprendre cette ligne, observez là de droite à gauche. \emph{li} est la
+    liste que vous appliquez. Python la parcourt un élément à la fois, en
+    assignant temporairement la valeur de chacun des éléments à la variable
+    elem. Python applique ensuite la fonction \emph{elem*2} et ajoute le résultat à la
+    liste retournée.
+\item Notez que les \emph{list comprehensions} ne modifient pas la liste initiale.
+\item Vous pouvez assigner le résultat d'une \emph{list comprehension} à la variable que
+    vous traitez. Python assemble la nouvelle liste en mémoire et assigne le
+    résultat à la variable une fois la transformation terminée.
+\end{enumerate}
+
+Voici les \emph{list comprehensions} dans la fonction \emph{buildConnectionString} que nous
+avons déclaré au Chapitre 2 :
+
+\begin{lstlisting}
+["%s=%s" % (k, v) for k, v in params.items()]
+\end{lstlisting}
+
+Notez tout d'abord que vous appelez la fonction \emph{items} du dictionnaire \emph{params}. Cette fonction retourne une liste de tuples avec toutes les données stockées dans le dictionnaire.
+
+\begin{example}[Les fonctions keys, values et items]
+\begin{lstlisting}
+>>> params = {"server":"mpilgrim", "database":"master", "uid":"sa", "pwd":"secret"}
+>>> params.keys()   (1)
+['server', 'uid', 'database', 'pwd']
+>>> params.values() (2)
+['mpilgrim', 'sa', 'master', 'secret']
+>>> params.items()  (3)
+[('server', 'mpilgrim'), ('uid', 'sa'), ('database', 'master'), ('pwd', 'secret')]
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item La méthode \emph{keys} d'un dictionnaire retourne la liste de toutes les clés.
+    Cette liste ne suit pas l'ordre dans lequel le dictionnaire a été défini
+    (souvenez-vous, les éléments d'un dictionnaire ne sont pas ordonnés) mais
+    cela reste une liste.
+\item La méthode \emph{values} retourne la liste de toutes les valeurs. La liste est
+    dans le même ordre que celle retournée parkeys, on a donc \emph{params.values()[n] == params[params.keys[n]]} pour toute valeur de \emph{n}.
+\item La méthode \emph{items} retourne une liste de tuples de la forme (clé, valeur). La liste contient toutes les données stockées dans le dictionnaire.
+\end{enumerate}
+
+Voyons maintenant ce que fait \emph{buildConnectionString}. Elle prend une liste,
+\emph{param.items()}, et crée une nouvelle liste en appliquant une instruction de
+formatage de chaîne à chacun de ses éléments. La nouvelle liste aura le même
+nombre d'éléments que \emph{params.items()} mais chaque élément sera une chaîne qui
+contient à la fois une clé et la valeur qui lui est associée dans le dictionnaire \emph{params}.
+
+\begin{example}[\emph{List comprehensions} dans \emph{buildConnectionString}, pas à pas]
+\begin{lstlisting}
+>>> params = {"server":"mpilgrim", "database":"master", "uid":"sa", "pwd":"secret"}
+>>> params.items()
+[('server', 'mpilgrim'), ('uid', 'sa'), ('database', 'master'), ('pwd', 'secret')]
+>>> [k for k, v in params.items()]                (1)
+['server', 'uid', 'database', 'pwd']
+>>> [v for k, v in params.items()]                (2)
+['mpilgrim', 'sa', 'master', 'secret']
+>>> ["%s=%s" % (k, v) for k, v in params.items()] (3)
+['server=mpilgrim', 'uid=sa', 'database=master', 'pwd=secret']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item Notez que nous utilisons deux variables pour parcourir la liste
+    \emph{params.items()}. Il s'agit d'un autre usage de l'assignment multiple. Le
+    premier élément de \emph{params.items()} est \emph{('server', 'mpilgrim')}, donc lors de
+    la première itération de la transformation, \emph{k} va prendre la valeur \emph{'server'}
+    et \emph{v} la valeur \emph{'mpilgrim'}. Dans ce cas, nous ignorons la valeur de \emph{v} et
+    plaçons uniquement la valeur de \emph{k} dans la liste résultante. Cette
+    transformation correspond donc au comportement de \emph{params.keys()}. (Vous
+    n'utiliseriez pas réellement une \emph{list comprehension} comme ceci dans du vrai
+    code; il s'agit d'un exemple exagérément simple pour que vous compreniez ce
+    qui se passe.)
+\item Nous faisons la même chose ici, mais nous ignorons la valeur de \emph{k} de telle
+    sorte que le résultat est équivalent à celui de \emph{params.values()}.
+\item En combinant les deux exemples précédent avec le formatage de chaîne, nous
+    obtenons une liste de chaînes comprenant la clé et la valeur de chaque
+    élément du dictionnaire. Cela ressemble étonnamment à la sortie du
+    programme, tout ce qui reste à faire maintenant est la jointure des
+    éléments de cette liste en une seule chaîne.
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur les \emph{list comprehensions}}
+\begin{itemize}
+\item Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} traite d'une autre manière de transformer des listes avec la fonction prédéfinie \emph{map}\footnote{\url{http://www.python.org/doc/current/tut/node7.html\#SECTION007130000000000000000}}.
+\item Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} montre comment emboîter des mutations de listes\footnote{\url{http://www.python.org/doc/current/tut/node7.html\#SECTION007140000000000000000}}.
+\end{itemize}
+
+\section{Jointure de listes et découpage de chaînes}
+
+Nous avons une liste de paires clé-valeur sous la forme \emph{clé=valeur} et nous voulons les assembler au sein d'une même chaîne. Pour joindre une liste de chaînes en une seule, nous pouvons utiliser la méthode \emph{join} d'un objet chaîne.
+
+Voici un exemple de jointure de liste provenant de la fonction \emph{buildConnectionString} :
+
+\begin{lstlisting}
+return ";".join(["%s=%s" % (k, v) for k, v in params.items()])
+\end{lstlisting}
+
+Une remarque intéressante avant de continuer. Je ne cesse de répéter que les fonctions sont des objets, que les chaînes sont des objets, que tout est objet. Vous pourriez penser que seules les variables de type chaîne sont des objets.
+Mais ce n'est pas le cas, regardez de plus près cet exemple et vous verrez que la chaîne « ; » est elle même un objet dont vous appelez la méthode \emph{join}.
+
+La méthode \emph{join} assemble les éléments d'une liste pour former une chaîne unique, chaque élément étant séparé par un point virgule. Le séparateur n'est pas forcément un point-virgule, il n'est même pas forcément un caractère
+unique. Il peut être n'importe quelle chaîne.
+
+\attention{Attention}{
+La méthode \emph{join} ne fonctionne qu'avec des listes de chaînes; elle n'applique pas la conversion de types. La jointure d'une liste comprenant au moins un élément non-chaîne déclenchera une exception.}
+
+\begin{example}[Sortie de \emph{odbchelper.py}]
+\begin{lstlisting}
+>>> params = {"server":"mpilgrim", "database":"master", "uid":"sa", "pwd":"secret"}
+>>> ["%s=%s" % (k, v) for k, v in params.items()]
+['server=mpilgrim', 'uid=sa', 'database=master', 'pwd=secret']
+>>> ";".join(["%s=%s" % (k, v) for k, v in params.items()])
+'server=mpilgrim;uid=sa;database=master;pwd=secret'
+\end{lstlisting}
+\end{example}
+
+La chaîne est alors retournée de la fonction \emph{odbchelper} et affichée par le bloc appelant, ce qui vous donne la sortie qui vous a tant émerveillé quand vous avez débuté la lecture de ce chapitre.
+
+Vous vous demandez probablement s'il existe une méthode analogue permettant de découper une chaîne en liste. Et bien sur elle existe, elle porte le nom de \emph{split}.
+
+\begin{example}[Découpage d'une chaîne]
+\begin{lstlisting}
+>>> li = ['server=mpilgrim', 'uid=sa', 'database=master', 'pwd=secret']
+>>> s = ";".join(li)
+>>> s
+'server=mpilgrim;uid=sa;database=master;pwd=secret'
+>>> s.split(";")    (1)
+['server=mpilgrim', 'uid=sa', 'database=master', 'pwd=secret']
+>>> s.split(";", 1) (2)
+['server=mpilgrim', 'uid=sa;database=master;pwd=secret']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item \emph{split} fait l'inverse de join en découpant une chaîne en une liste de
+    plusieurs éléments. Notez que le délimiteur («~;~») est totalement
+    supprimé, il n'apparaît dans aucun des éléments de la liste retournée.
+\item \emph{split} prend en deuxième argument optionnel le nombre de découpages à
+    effectuer («~Des arguments optionnels ?~» Vous apprendrez à en définir dans
+    vos propres fonctions au prochain chapitre.)
+\end{enumerate}
+
+\note{Rechercher avec split}{
+La commande \emph{une\_chaîne.split(delimiteur, 1)} est une technique utile pour chercher une sous-chaîne dans une chaîne et utiliser tout ce qui précède cette sous-chaîne (le premier élément de la liste retournée) et tout ce qui la suit (le second élément de la liste retournée).}
+
+\paragraph{Pour en savoir plus sur les méthodes de chaînes}
+\begin{itemize}
+\item{La Python Knowledge Base\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/199/}} répond aux questions courantes à propose des chaînes\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/480}} et dispose de nombreux exemples de code utilisant des chaînes\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/539}}.}
+\item{La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} récapitule toutes les méthodes de chaînes\footnote{\url{http://www.python.org/doc/current/lib/string-methods.html}}.}
+\item{La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} documente le module \emph{string}\footnote{\url{http://www.python.org/doc/current/lib/module-string.html}}.}
+\item{The Whole Python FAQ\footnote{\url{http://www.python.org/doc/FAQ.html}} explique pourquoi \emph{join} est une méthode de chaînes\footnote{\url{http://www.python.org/cgi-bin/faqw.py?query=4.96&querytype=simple&casefold=yes&req=search)}}et non une méthode de liste.}
+\end{itemize}
+
+\subsection{Note historique sur les méthodes de chaînes}
+
+Lorsque j'ai débuté l'apprentissage de Python, je m'attendais à ce que \emph{join} soit une méthode de liste qui aurait pris un séparateur comme argument. Beaucoup de gens pensent la même chose et il y a une véritable histoire derrière la méthode \emph{join}. Avant Python 1.6, les chaînes n'étaient pas pourvue de toutes ces méthodes si utiles. Il y avait un module string séparé qui contenait toutes les fonctions de manipulation de chaînes de caractères, chacune prenant une chaîne comme premier argument. Ces fonctions ont été considérées assez importantes pour être intégrées dans les chaînes elles même, ce qui semblait logique pour des fonctions comme \emph{lower}, \emph{upper} et \emph{split}. Mais beaucoup de programmeurs Python issus du noyau dur émirent des objections quant à la méthode join en arguant du fait qu'elle devrait être plutôt une méthode de liste ou tout simplement rester une fonction du module string (qui contient encore bien des choses utiles). J'utilise exclusivement la nouvelle méthode \emph{join} mais vous verrez du code écrit des deux façons et si cela vous pose un réel problème, vous pouvez toujours opter pour l'ancienne fonction \emph{string.join}.
+
+\section{Résumé}\label{Résumé}
+
+À présent, le programme \emph{odbchelper.py} et sa sortie devraient vous paraître
+parfaitement clairs.
+
+\begin{lstlisting}
+def buildConnectionString(params):
+    """Build a connection string from a dictionary of parameters.
+
+    Returns string."""
+    return ";".join(["%s=%s" % (k, v) for k, v in params.items()])
+
+if __name__ == "__main__":
+    myParams = {"server":"mpilgrim", \
+                "database":"master", \
+                "uid":"sa", \
+                "pwd":"secret" \
+                }
+    print buildConnectionString(myParams)
+\end{lstlisting}
+
+Voici la sortie de \emph{odbchelper.py} :
+\begin{lstlisting}[style=none]
+server=mpilgrim;uid=sa;database=master;pwd=secret
+\end{lstlisting}
+
+Avant de vous plonger dans le chapitre suivant, assurez vous que vous vous
+sentez à l'aise pour :
+\begin{itemize}
+\item{utiliser l'IDE Python pour tester des expressions de manière interactive ;}
+\item{écrire des modules Python et les exécuter depuis votre IDE ou en ligne de commande ;}
+\item{importer des modules et appeler leurs fonctions ;}
+\item{déclarer des fonctions et utiliser des doc string, des variables locales et une indentation correcte ;}
+\item{définir des dictionnaires, des tuples et des listes ;}
+\item{accéder aux attributs et méthodes de tout objet, y compris les chaînes, les listes, les dictionnaires, les fonctions et les modules ;}
+\item{concaténer des valeur avec le formatage de chaînes ;}
+\item{utiliser les lists comprehensions pour la mutation de listes ;}
+\item{découper des chaînes en listes et joindre des listes en chaînes.}
+\end{itemize}
