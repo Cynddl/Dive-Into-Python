@@ -7,7 +7,7 @@ La plupart des autres livres expliquent pas à pas les concepts de programmation
 
 Voici un programme Python complet et fonctionnel. Il ne signifie probablement rien pour vous. Ne vous en faites pas, nous allons le disséquer ligne par ligne. Mais lisez-le et voyez ce que vous pouvez déjà en retirer.
 
-\paragraph*{Exemple 2.1. odbchelper.py}
+\begin{example}[odbchelper.py]
 
 Si vous ne l’avez pas déjà fait, vous pouvez télécharger\footnote{\url{http://diveintopython.org/download/diveintopython-examples-5.4.zip}} cet exemple ainsi que les autres exemples du livre.
 
@@ -24,6 +24,7 @@ if name == "main":
                 }
     print buildConnectionString(myParams)
 \end{lstlisting}
+\end{example}
 
 Lancez maintenant ce programme et observez ce qui se passe.
 
@@ -56,15 +57,15 @@ Il y a plusieurs remarques à faire. Premièrement, le mot clé \emph{def} débu
 Deuxièmement, la fonction ne définit pas le type de données qu'elle retourne.Les fonctions Python ne définissent pas le type de leur valeur de retour, elle ne spécifient même pas si elle retournent une valeur ou pas. En fait, chaque fonction Python retourne une valeur, si la fonction exécute une instruction \emph{return}, elle va en retourner la valeur, sinon elle retournera \emph{None}, la valeur nulle en Python.
 
 \medskip
-\noindent \textbf{Note}: Python vs. Visual Basic : les valeurs de retour \\
-En Visual Basic, les fonctions (qui retournent une valeur) débutent avec\emph{function} et les sous-routines (qui ne retournent aucune valeur) débutent avec \emph{sub}. Il n'y a pas de sous-routines en Python. Tout est fonction, toute fonction retourne un valeur (même si c'est \emph{None}) et toute fonction débute avec \emph{def}.
+\note{Python vs. Visual Basic : les valeurs de retour}{
+En Visual Basic, les fonctions (qui retournent une valeur) débutent avec\emph{function} et les sous-routines (qui ne retournent aucune valeur) débutent avec \emph{sub}. Il n'y a pas de sous-routines en Python. Tout est fonction, toute fonction retourne un valeur (même si c'est \emph{None}) et toute fonction débute avec \emph{def}.}
 
 \medskip
 Troisièmement, les arguments, \emph{params}, ne spécifient pas de types de données. En Python, les variables ne sont jamais explicitement typées. Python détermine le type d'une variable et en garde la trace en interne.
 
 \medskip
-\noindent \textbf{Note}: Python vs. Java : les valeurs de retour\\
-En Java, C++ et autres langage à typage statique, vous devez spécifier les types de données de la valeur de retour d'une fonction ainsi que de chaque paramètre. En Python, vous ne spécifiez jamais de manière explicite le type de quoi que ce soit. En se basant sur la valeur que vous lui assignez, Python gère les types de données en interne.
+\note{Python vs. Java : les valeurs de retour}{
+En Java, C++ et autres langage à typage statique, vous devez spécifier les types de données de la valeur de retour d'une fonction ainsi que de chaque paramètre. En Python, vous ne spécifiez jamais de manière explicite le type de quoi que ce soit. En se basant sur la valeur que vous lui assignez, Python gère les types de données en interne.}
 
 \subsection{Comparaison des types de données en Python et dans d'autres langages de programmation}
 
@@ -88,27 +89,23 @@ Python est donc à la fois à typage dynamique (il n'utilise pas de déclaration
 \section*{Documentation des fonctions}
 Vous pouvez documenter une fonction Python en lui donnant une chaîne de documentation (\emph{doc string}).
 
-\paragraph*{Exemple 2.2. Définition d'une doc string pour la fonction buildConnectionString}
-
+\begin{example}[Définition d'une doc string pour la fonction \emph{buildConnectionString}]
 \begin{lstlisting}
 def buildConnectionString(params):
     """Build a connection string from a dictionary of parameters.
     Returns string."""
 \end{lstlisting}
+\end{example}
 
-Les tripes guillemets indiquent une chaîne multi-lignes. Tout ce qu'il y a entre l'ouverture et la fermeture des guillemets fait partie de la chaîne, y compris les retours chariot et les autres guillemets. On peut les utiliser partout, mais vous les verrez le plus souvent utilisées pour définir une \emph{doc string}.
+Les triples guillemets indiquent une chaîne multi-lignes. Tout ce qu'il y a entre l'ouverture et la fermeture des guillemets fait partie de la chaîne, y compris les retours chariot et les autres guillemets. On peut les utiliser partout, mais vous les verrez le plus souvent utilisées pour définir une \emph{doc string}.
 
-\medskip
-\noindent \textbf{Note} : Python vs. Perl : guillemets
-
-Les triples guillemets sont aussi un moyen simple de définir une chaîne contenant à la fois des guillemets simples et doubles, comme \emph{qq/.../} en Perl.
-\medskip
+\note{Python vs. Perl : guillemets}{
+Les triples guillemets sont aussi un moyen simple de définir une chaîne contenant à la fois des guillemets simples et doubles, comme \emph{qq/.../} en Perl.}
 
 Tout ce qui se trouve entre les triples guillemets fait partie de la doc \emph{string} de la fonction, qui décrit ce que fait la fonction. Une \emph{doc string}, si elle existe, doit être la première chose déclarée dans une fonction (la première chose après les deux points). Techniquement parlant, vous n'êtes pas obligés de donner une \emph{doc string} à votre fonction, mais vous devriez toujours le faire. Je sais que vous avez déjà entendu cela à tous les cours de programmation auxquels vous avez assisté, mais Python vous donne une motivation supplémentaire : la \emph{doc string} est disponible à l'exécution en tant qu'attribut de fonction.
 
-\medskip
-\noindent \textbf{Note}: Pourquoi les doc string sont une bonne Chose.\\
-Beaucoup d'IDE Python utilisent les \emph{doc string} pour fournir une documentation contextuelle, ainsi lorsque vous tapez le nom d'une fonction, sa \emph{doc string} apparaît dans une bulle d'aide. Cela peut être incroyablement utile, mais cette utilité est liée à la qualité de votre doc string.
+\note{Pourquoi les doc string sont une bonne Chose}{
+Beaucoup d'IDE Python utilisent les \emph{doc string} pour fournir une documentation contextuelle, ainsi lorsque vous tapez le nom d'une fonction, sa \emph{doc string} apparaît dans une bulle d'aide. Cela peut être incroyablement utile, mais cette utilité est liée à la qualité de votre \emph{doc string}.}
 
 \medskip
 \noindent Pour en savoir plus sur la documentation des fonctions :
@@ -122,17 +119,17 @@ Beaucoup d'IDE Python utilisent les \emph{doc string} pour fournir une documenta
 Au cas ou vous ne l'auriez pas noté, je viens d'expliquer que les fonctions Python ont des attributs et que ces attributs étaient disponibles au moment de l'exécution. 
 Une fonction, comme tout le reste en Python, est un objet. Ouvrez votre IDE Python favorite et suivez ces étapes :
 
-\paragraph*{Exemple 2.3. Accéder à la doc \emph{string} de la fonction \emph{buildConnectionString}}
-
+\begin{example}[Accéder à la doc \emph{string} de la fonction \emph{buildConnectionString}]
 \begin{lstlisting}
 >>> import odbchelper                                   (1)
 >>> params = {"server":"mpilgrim","database":"master","uid":"sa","pwd":"secret"}
 >>> print odbchelper.buildConnectionString(params)      (2)
 server=mpilgrim;uid=sa;database=master;pwd=secret
->>> print odbchelper.buildConnectionString.doc      (3)
+>>> print odbchelper.buildConnectionString.doc          (3)
 Build a connection string from a dictionary
 Returns string.
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
 \item{La première ligne importe le programme \emph{odbchelper} comme module -- un morceau de code qui peut être utilisé interactivement ou depuis un programme Python (vous verrez des exemples de programmes Python multimodules au Chapitre 4). Une fois que vous importez un module, vous pouvez référencer chacune de ses fonctions, classes ou attributs publics.
@@ -141,14 +138,13 @@ Les modules peuvent faire cela pour accéder aux fonctionnalités offertes par d
 \item{Plutôt que d'appeler la fonction comme vous l'auriez attendu, nous demandons un des attributs de la fonction, \emph{doc.}}
 \end{enumerate}
 
-\paragraph*{Note: Python vs. Perl : import}
-\emph{import} en Python est similaire à require en Perl. Une fois que vous importez un module Python, vous accédez à ses fonctions avec \emph{module.function}. Une fois que vous incluez un module Perl, vous accédez à ses fonctions avec \emph{module::function}.
+\note{Python vs. Perl : import}{
+\emph{import} en Python est similaire à require en Perl. Une fois que vous importez un module Python, vous accédez à ses fonctions avec \emph{module.function}. Une fois que vous incluez un module Perl, vous accédez à ses fonctions avec \emph{module::function}.}
 
 \subsection{Le chemin de recherche d'import}
 Avant d'aller plus loin, je veux mentionner rapidement le chemin de recherche de bibliothèques. Python cherche dans plusieurs endroits lorsque vous essayez d'importer un module. Plus précisément, il regarde dans tous les répertoires définis dans \emph{sys.path}. C'est une simple liste et vous pouvez facilement la voir ou la modifier à l'aide des méthodes standard de listes (nous en apprendrons d'avantage sur les listes plus loin dans ce chapitre).
 
-\paragraph{Exemple 2.4. Chemin de recherche d'import}
-
+\begin{example}[Chemin de recherche d'import]
 \begin{lstlisting}
 >>> import sys                          (1)
 >>> sys.path                            (2)
@@ -160,6 +156,7 @@ Avant d'aller plus loin, je veux mentionner rapidement le chemin de recherche de
 <module 'sys' (built-in)>
 >>> sys.path.append('/my/new/path')     (4)
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
 \item{Importer le module \emph{sys} rend toutes ses fonctions et attributs disponibles.}
@@ -178,31 +175,29 @@ Reste la question : qu'est-ce qu'un objet ? Chaque langage de programmation déf
 Ceci est important et il ne fait aucun mal de le souligner une derniere fois : en Python tout est objet. Les chaînes sont des objets. Les listes sont des objets. Les fonctions sont des objets. Même les modules sont des objets.
 
 \medskip
-\noindent Pour en savoir plus sur les objets
-
-\medskip
+\noindent Pour en savoir plus sur les objets :
 \begin{itemize}
-\item{La Python Reference Manual\footnote{\url{http://www.python.org/doc/current/ref/}} explique précisémment ce qu'implique de dire que tout est objet en Python\footnote{\url{http://www.python.org/doc/current/ref/objects.html}}, puisque certains pédants aiment discuter longuement de ce genre de choses.} 
+\item{la Python Reference Manual\footnote{\url{http://www.python.org/doc/current/ref/}} explique précisémment ce qu'implique de dire que tout est objet en Python\footnote{\url{http://www.python.org/doc/current/ref/objects.html}}, puisque certains pédants aiment discuter longuement de ce genre de choses.} ;
 \item{eff-bot\footnote{\url{http://www.effbot.org/guides/}} propose un résumé des objets Python\footnote{\url{http://www.effbot.org/guides/python-objects.htm}}.}
 \end{itemize}
 
 \section{Indentation du code}
 
-Les fonctions Python n'ont pas de begin ou end explicites, ni d'accolades qui pourraient marquer là ou commence et ou se termine le code de la fonction. Le seul délimiteur est les deux points (<<:>>) et l'indentation du code lui-même.
+Les fonctions Python n'ont pas de begin ou end explicites, ni d'accolades qui pourraient marquer là ou commence et ou se termine le code de la fonction. Le seul délimiteur est les deux points («~:~») et l'indentation du code lui-même.
 
-\paragraph*{Exemple 2.5. Indentation de la fonction buildConnectionString}
-
+\begin{example}[Indentation de la fonction \emph{buildConnectionString}]
 \begin{lstlisting}
 def buildConnectionString(params):
     """Build a connection string from a dictionary of parameters.
     Returns string."""
     return ";".join(["%s=%s" % (k, v) for k, v in params.items()])
 \end{lstlisting}
+\end{example}
 
 Les blocs de code (fonctions, instructions \emph{if}, boucles \emph{for} ou \emph{while} etc.) sont définis par leur indentation. L'indentation démarre le bloc et la désindendation le termine. Il n'y a pas d'accolades, de crochets ou de mots clés spécifiques. Cela signifie que les espaces blancs sont significatifs et qu'ils doivent être cohérents. Dans cet exemple, le code de la fonction -- y compris sa doc string -- sont indentés de 4 espaces. Cela ne doit pas être forcément 4 espaces, mais il faut que ce soit cohérent. La première ligne non indentée est en dehors de la fonction.
 L'exemple 2.6, «~Instructions \emph{if}~» montre un exemple d'indentation du code avec des instructions \emph{if}.
 
-\paragraph*{Exemple 2.6. Instructions if}
+\begin{example}[Instructions \emph{if}]
 \begin{lstlisting}
 def fib(n):                   (1)
     print 'n =', n            (2)
@@ -212,25 +207,26 @@ def fib(n):                   (1)
         print 'end of the line'
         return 1
 \end{lstlisting}
+\end{example}
 
-\begin{itemize}
+\begin{enumerate}
     \item{Voici une fonction nommée \emph{fib} qui prend un argument «~n~». Tout le code de cette fonction est indenté.}
-    \item{Afficher une sortie à l'écran est très facile en Python, il suffit d'utiliser print. Les instructions print peuvent prendre n'importe quel type de données, y compris les chaînes, les entiers et d'autres types prédéfinis comme les dictionnaires et les listes, que vous découvrirez dans le prochain chapitre. Vous pouvez même mélanger les types pour imprimer plusieurs éléments sur la même ligne en utilisant une liste de valeurs séparées par des virgules. Chaque valeur est affichée sur la même ligne, séparée par des espaces (les virgules ne sont pas imprimées). Donc, lorsque fib est appelé avec 5, cette ligne affichera "n = 5".}
+    \item{Afficher une sortie à l'écran est très facile en Python, il suffit d'utiliser print. Les instructions print peuvent prendre n'importe quel type de données, y compris les chaînes, les entiers et d'autres types prédéfinis comme les dictionnaires et les listes, que vous découvrirez dans le prochain chapitre. Vous pouvez même mélanger les types pour imprimer plusieurs éléments sur la même ligne en utilisant une liste de valeurs séparées par des virgules. Chaque valeur est affichée sur la même ligne, séparée par des espaces (les virgules ne sont pas imprimées). Donc, lorsque fib est appelé avec 5, cette ligne affichera «~n = 5~».}
     \item{Les instructions if sont un type de bloc de code. Si l'expression if est évaluée à vrai, le bloc de code indenté est exécuté, sinon on saute au bloc else.}
     \item{Bien sûr, les blocs if et else peuvent contenir des lignes multiples, tant qu'elles sont toutes indentées au même niveau. Ce bloc else contient deux lignes de code. Il n'y a pas d'autre syntaxe pour les blocs de codes multilignes. Indentez et c'est tout.}
-\end{itemize}
+\end{enumerate}
 
 \medskip
 Après quelques protestations initiales et des analogies méprisantes à Fortran, vous vous en accomoderez et commencerez à en voir les bénéfices. Un des bénéfices majeurs est que tous les programmes Python ont la même apparence puisque l'indentation est une caractéristique du langage et non une question de style. Cela rend plus simple à comprendre le code Python des autres.
 
-\paragraph{Note : Python vs. Java : séparation des instructions}
-Python utilise le retour chariot pour séparer les instructions, deux points et l'indentation pour séparer les blocs de code. C++ et Java utilisent des points-virgules pour séparer les instructions et des accolades pour séparer les blocs de code.
+\note{Python vs. Java : séparation des instructions}{
+Python utilise le retour chariot pour séparer les instructions, deux points et l'indentation pour séparer les blocs de code. C++ et Java utilisent des points-virgules pour séparer les instructions et des accolades pour séparer les blocs de code.}
 
 \medskip
-\noindent Pour en savoir plus sur l'indentation du code
+\noindent Pour en savoir plus sur l'indentation du code :
 \begin{itemize}
-    \item La Python Reference Manual\footnote{\url{http://www.python.org/doc/current/ref/}} discute des aspects multiplate-formes de l'indentation et présente diverses erreurs d'indentation (\footnote{\url{http://www.python.org/doc/current/ref/indentation.html}}.
-    \item Le Python Style Guide \footnote{\url{http://www.python.org/doc/essays/styleguide.html}} discute du bon usage de l'indentation.
+    \item la Python Reference Manual\footnote{\url{http://www.python.org/doc/current/ref/}} discute des aspects multiplate-formes de l'indentation et présente diverses erreurs d'indentation (\footnote{\url{http://www.python.org/doc/current/ref/indentation.html}} ;
+    \item le Python Style Guide \footnote{\url{http://www.python.org/doc/essays/styleguide.html}} discute du bon usage de l'indentation.
 \end{itemize}
 
 \section{Test des modules}
@@ -243,9 +239,9 @@ if name == "main":
 
 Quelques remarques avant de passer aux choses sérieuses. Premièrement, les parenthèses ne sont pas obligatoires autour de l'expression if. Ensuite, l'instruction if se termine par deux points et est suivie de code indenté.
 
-\paragraph*{Note: Python vs. C: comparaison et assignation}
+\note{Python vs. C: comparaison et assignation}{
 A l'instar de C, Python utilise == pour la comparaison et = pour l'assignement. Mais au contraire de C, Python ne permet pas les assignations dans le corps d'une instruction afin d'éviter qu'une valeur soit accidentellement assignée alors que vous pensiez effectuer une simple comparaison.
-En quoi cette instruction \emph{if} est-elle une astuce ? Les modules sont des objets et tous les modules disposent de l'attribut prédéfini \emph{name}. Le \emph{name} d'un module dépend de la façon dont vous l'utilisez. Si vous importez le module, son \emph{name} est le nom de fichier du module sans le chemin d'accès ni le suffixe. Mais vous pouvez aussi lancer le module directement en tant que programme, dans ce cas \emph{name} va prendre par défaut une valeur spéciale, \emph{main}.
+En quoi cette instruction \emph{if} est-elle une astuce ? Les modules sont des objets et tous les modules disposent de l'attribut prédéfini \emph{name}. Le \emph{name} d'un module dépend de la façon dont vous l'utilisez. Si vous importez le module, son \emph{name} est le nom de fichier du module sans le chemin d'accès ni le suffixe. Mais vous pouvez aussi lancer le module directement en tant que programme, dans ce cas \emph{name} va prendre par défaut une valeur spéciale, \emph{main}.}
 
 \begin{lstlisting}
 >>> import odbchelper

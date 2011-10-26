@@ -3,12 +3,43 @@
 \usepackage[french]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc} % encodage en utf8
-\usepackage{url} % permet l'utilisation des urls avec \url{}
+\usepackage[hyphens]{url} % permet l'utilisation des urls avec \url{}
 \usepackage[pdfborder=0]{hyperref} % permet les hyperliens dans la table des matières et les footnotes.
 \usepackage{fourier}
 \usepackage{fullpage}
-\usepackage{listings}
-\lstset{language=Python}
+
+\sloppy % évite le dépassement des urls dans les marges
+
+\usepackage{color, listings, bera}
+\definecolor{keywords}{RGB}{255,0,90}
+\definecolor{comments}{RGB}{60,179,113}
+\lstset{
+language=Python,
+xleftmargin=1cm, % indentation du bloc de code
+%numbers=left, numberstyle=\scriptsize,
+basicstyle=\small\ttfamily,
+keywordstyle=\color{keywords},
+commentstyle=\color{comments}\emph,
+breaklines=true, breakatwhitespace=true, % retour à la ligne activé
+postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow\space}}
+}
+\lstdefinestyle{none}{
+xleftmargin=0cm,
+language={},
+commentstyle={}
+}
+
+\newcounter{example}
+\newenvironment{example}[1][]{
+  \refstepcounter{example}\par\medskip\noindent
+  \textbf{Exemple~\thechapter.\theexample. #1}
+  \rmfamily
+}{\medskip}
+
+\newcommand\note[2]{\medskip\noindent \rule{1ex}{1ex} \textbf{Note : #1} \\ #2\medskip}
+\newcommand\attention[2]{\medskip\noindent \textcolor{red}{\textcircled{!}} \textbf{#1} \\ #2\medskip}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \hypersetup{ % Modifiez la valeur des champs suivants
@@ -18,6 +49,8 @@
     pdfkeywords = {python},%
     pdfproducer = {PDFLaTeX}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \begin{document}
 
 \noindent {\Huge Plongez au coeur de Python}
@@ -59,7 +92,7 @@ Les évolutions de cet ouvrage (et de sa traduction française) sont disponibles
 %CHAPITRES A INCLURE
 \include{chapitres/DIP_chapitre1}
 \include{chapitres/DIP_chapitre2}
-%\include{chapitres/DIP_chapitre}
+\include{chapitres/DIP_chapitre3}
 %\include{chapitres/DIP_chapitre}
 %\include{chapitres/DIP_chapitre}
 %\include{chapitres/DIP_chapitre}

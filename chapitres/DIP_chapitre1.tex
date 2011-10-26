@@ -5,14 +5,14 @@ Bienvenue dans le monde de Python ! Préparez-vous à plonger. Dans ce chapitre,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Quel Python vous faut-il ?} \label{QuelPythonVousFautil}
 
-La première chose à faire avec Python est de l'installer. Mais est-ce nécéssaire ?
+La première chose à faire avec Python est de l'installer. Mais est-ce nécessaire ?
 
 \medskip
 Si vous utilisez un compte sur un serveur hébergé, votre FAI a peut-être déjà installé Python. La plupart des distributions Linux les plus courantes installent Python par défaut. Mac OS X 10.2 et les versions suivantes comprennent une version en ligne de commande de Python, mais vous souhaiterez sans doute installer une version ayant une interface graphique plus typique du Mac.
 
-Windows n'inclut aucune version de Python, mais ne désespérez pas ! Il y a de nombreuses manières d'installer Python sous Windows. Comme vous pouvez le constater, Python supporte un grand nombre de systèmesd'exploitation. La liste complète comprend Windows, Mac OS, Mac OS X et tousles systèmes libres compatibles UNIX comme Linux. Il y a aussi des versions pour Sun Solaris, AS/400, Amiga, OS/2, BeOS et une pléthore d'autres plate-formes dont vous n'avez sans doute jamais entendu parler.
+Windows n'inclut aucune version de Python, mais ne désespérez pas ! Il y a de nombreuses manières d'installer Python sous Windows. Comme vous pouvez le constater, Python supporte un grand nombre de systèmes d'exploitation. La liste complète comprend Windows, Mac OS, Mac OS X et tousles systèmes libres compatibles UNIX comme Linux. Il y a aussi des versions pour Sun Solaris, AS/400, Amiga, OS/2, BeOS et une pléthore d'autres plates-formes dont vous n'avez sans doute jamais entendu parler.
 
-De plus, les programmes Python écrits sur une plate-forme peuvent, en prenant en compte certain détails, être exécutés sur toutes les plate-formes supportées. Par exemple, je développe régulièrement des programmes Python sous Windows pour les déployer ensuite sous Linux.
+De plus, les programmes Python écrits sur une plate-forme peuvent, en prenant en compte certains détails, être exécutés sur toutes les plates-formes supportées. Par exemple, je développe régulièrement des programmes Python sous Windows pour les déployer ensuite sous Linux.
 
 \medskip
 Mais revenons à la question de départ, «~Quel Python vous faut-il~?~» Celle qui fonctionne sur la plate-forme que vous utilisez.
@@ -20,11 +20,11 @@ Mais revenons à la question de départ, «~Quel Python vous faut-il~?~» Celle 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section {Python sous Windows}\label{Python sous Windows}
 
-Sous Windows, il y a plusieurs possibilités pour installer Python. ActiveState propose un programme d'installation pour Windows appelé ActivePython, qui comprend une version complète de Python, un IDE doté d'un éditeur de code prenant en compte Python et quelques extensions spécifiques à Windows pour Python qui permettent d'accèder aux services et aux APIs propres à Windows, ainsi qu'à la Base de registre.
+Sous Windows, il y a plusieurs possibilités pour installer Python. ActiveState propose un programme d'installation pour Windows appelé ActivePython, qui comprend une version complète de Python, un IDE doté d'un éditeur de code prenant en compte Python et quelques extensions spécifiques à Windows pour Python qui permettent d'accéder aux services et aux APIs propres à Windows, ainsi qu'à la Base de registre.
 
 ActivePython est librement téléchargeable, bien qu'il ne soit pas open source.C'est l'IDE que j'ai utilisé pour apprendre Python et je vous recommande de l'essayer, à moins que vous n'ayez une raison spécifique de ne pas le faire. Une de ces raisons pourrait être qu'ActiveState a généralement plusieurs mois de retard quand une nouvelle version de Python est publiée. Si vous avez absolument besoin de la dernière version de Python et qu'ActivePython a une version de retard, vous pourrez choisir la deuxième option pour installer Python sous Windows.
 
-La deuxième option est le programme d'installation <<officiel>> de Python,distribué par les gens qui développent Python. Il est librement téléchargeableet open source et il installe toujours la version la plus récente de Python.
+La deuxième option est le programme d'installation « officiel » de Python,distribué par les gens qui développent Python. Il est librement téléchargeable et open source et il installe toujours la version la plus récente de Python.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Procédure 1.1. Option 1 : installer ActivePython}
@@ -42,7 +42,7 @@ Voici la procédure pour installer ActivePython :
 
 Vous verrez quelque chose comme l'écran suivant :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 PythonWin 2.2.2 (#37, Nov 26 2002, 10:24:37) [MSC 32 bit (Intel)] on win32.
 Portions Copyright 1994-2001 Mark Hammond (mhammond@skippinet.com.au) -
 see 'Help/About PythonWin' for further copyright information.
@@ -60,7 +60,7 @@ see 'Help/About PythonWin' for further copyright information.
     \item Après l'achèvement de l'installation, fermez le programme d'installation et lancez Démarrer > Programmes > Python 2.3 > IDLE (Python GUI). Vous verrez quelque chose comme l'écran suivant :
 \end{enumerate}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Python 2.3.2 (#49, Oct  2 2003, 20:02:00) [MSC v.1200 32 bit (Intel)] on win32
 Type "copyright", "credits" or "license()" for more information.
 \begin{center}
@@ -79,23 +79,23 @@ IDLE 1.0
 Sous Mac OS X, vous avez deux possibilités, garder la version préinstallée ou installer une nouvelle version. Vous préfèrerez sans doute cette dernière solution.
 
 \medskip
-Mac OS X 10.2 et les version ultérieures contiennent une version en ligne de commande de Python. Si vous êtes à l'aise avec la ligne de commande, vous pouvez utiliser cette version pour le premier tiers du livre. Par contre, la version préinstallée ne contient pas d'analyseur pour le XML, vous devrez donc installer la version complète lorsque vous arriverez au chapitre traitant du XML. Installer la dernière version présente également l'avantage d'une interface graphique interactive.
+Mac OS X 10.2 et les versions ultérieures contiennent une version en ligne de commande de Python. Si vous êtes à l'aise avec la ligne de commande, vous pouvez utiliser cette version pour le premier tiers du livre. Par contre, la version préinstallée ne contient pas d'analyseur pour le XML, vous devrez donc installer la version complète lorsque vous arriverez au chapitre traitant du XML. Installer la dernière version présente également l'avantage d'une interface graphique interactive.
 
 \subsection*{Procédure 1.3. Exécuter la version préinstallée de Python sous Mac OS X}
 
 Pour utiliser la version préinstallée de Python, suivez ces étapes :
 
 \begin {enumerate}
-    \item Ouvrez le dossier /Applications.
-    \item Ouvrez le dossier Utilitaires.
-    \item Double-cliquez sur Terminal pour ouvrir une fenêtre de terminal et accéder à la ligne de commande.
-    \item Tapez python sur la ligne de commande.
+    \item Ouvrez le dossier \emph{/Applications}.
+    \item Ouvrez le dossier \emph{Utilitaires}.
+    \item Double-cliquez sur \emph{Terminal} pour ouvrir une fenêtre de terminal et accéder à la ligne de commande.
+    \item Tapez \emph{python} sur la ligne de commande.
 \end{enumerate}
 
 \medskip
 \noindent Essayez :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Welcome to Darwin!
 [localhost:~] you% python
 Python 2.2 (#1, 07/14/02, 23:25:09)
@@ -110,19 +110,19 @@ Type "help", "copyright", "credits", or "license" for more information.
 Suivez ces étapes pour télécharger et installer la dernière version de Python :
 
 \begin{enumerate}
-    \item{Téléchargez l'image disque MacPython-OSX depuis \url{http://www.cwi.nl/~jack/macpython.html}. Si votre navigateur n'a pas monté l'image, double-cliquez sur MacPython-OSX-2.3-1.dmg pour la monter sur le bureau.}
-    \item{Double-cliquer sur le programme d'installation, MacPython-OSX.pkg.}
+    \item{Téléchargez l'image disque MacPython-OSX depuis \url{http://www.cwi.nl/~jack/macpython.html}. Si votre navigateur n'a pas monté l'image, double-cliquez sur \emph{MacPython-OSX-2.3-1.dmg} pour la monter sur le bureau.}
+    \item{Double-cliquer sur le programme d'installation, \emph{MacPython-OSX.pkg}.}
     \item{Le programme d'installation vous demandera votre nom et mot de passe d'administrateur.}
     \item{Suivez les étapes du programme d'installation.}
     \item{Lorsque l'installation est terminée, fermez le programme d'installation et ouvrez le dossier /Applications.}
-    \item{Ouvrez le dossier MacPython-2.3.}
+    \item{Ouvrez le dossier \emph{MacPython-2.3}.}
     \item{Double-cliquez sur PythonIDE pour lancer Python.}
 \end{enumerate}
 
 \medskip
-L'IDE MacPython devrait afficher un écran d'accueil, puis vous amener à l'interface interactive. Si l'interface n'apparaît pas, sélectionnez Window-> Python Interactive (Cmd-0). La fenêtre qui s'ouvre ressemblera à l'écran suivant :
+L'IDE MacPython devrait afficher un écran d'accueil, puis vous amener à l'interface interactive. Si l'interface n'apparaît pas, sélectionnez \emph{Window -> Python Interactive (Cmd-0)}. La fenêtre qui s'ouvre ressemblera à l'écran suivant :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Python 2.3 (#2, Jul 30 2003, 11:45:28)
 [GCC 3.1 20020420 (prerelease)]
 Type "copyright", "credits" or "license" for more information.
@@ -132,8 +132,8 @@ MacPython IDE 1.0.1
 
 Notez qu'une fois que vous installez la dernière version, la version préinstallée est toujours présente. Si vous exécutez des scripts depuis la ligne de commande, vous devez savoir quelle version de Python vous utilisez.
 
-\paragraph*{Exemple 1.1. Deux versions de Python}
-\begin{lstlisting}
+\begin{example}[Deux versions de Python]
+\begin{lstlisting}[style=none]
 [localhost:~] you% python
 Python 2.2 (#1, 07/14/02, 23:25:09)
 [GCC Apple cpp-precomp 6.14] on darwin
@@ -146,6 +146,7 @@ Type "help", "copyright", "credits", or "license" for more information.
 >>> [press Ctrl+D to get back to the command prompt]
 [localhost:~] you%
 \end{lstlisting}
+\end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Python sous Mac OS 9}\label{Python sous Mac OS 9}
@@ -165,7 +166,7 @@ Mac OS 9 n'est fournit avec aucune version de Python, mais l'installation en est
 \medskip
 L'IDE MacPython devrait afficher un écran d'accueil, puis vous amener à l'interface interactive. Si l'interface n'apparaît pas, sélectionnez Window > Python Interactive (Cmd-0). La fenêtre qui s'ouvrira ressemblera à l'écran suivant :
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 Python 2.3 (#2, Jul 30 2003, 11:45:28)
 [GCC 3.1 20020420 (prerelease)]
 Type "copyright", "credits" or "license" for more information.
@@ -176,12 +177,11 @@ MacPython IDE 1.0.1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Python sous RedHat Linux}\label{Python sous RedHat Linux}
 
-L'installation sous un système d'exploitation compatible UNIX tel que Linux est simple si vous choisissez l'installation d'un paquetage binaire. Des paquetage binaires précompilés sont disponibles pour les distributions Linux les plus répandues. Vous pouvez également compiler à partir des sources.
+L'installation sous un système d'exploitation compatible UNIX tel que Linux est simple si vous choisissez l'installation d'un paquetage binaire. Des paquetages binaires précompilés sont disponibles pour les distributions Linux les plus répandues. Vous pouvez également compiler à partir des sources.
 Téléchargez le dernier RPM Python en allant sur \url{http://www.python.org/ftp/python/2.3.3/} et en sélectionnant le numéro de version le plus haut, puis en sélectionnant le sous-répertoire rpms/ de cette version. Téléchargez ensuite le RPM ayant le plus haut numéro de version. Vous pouvez l'installer avec la commande rpm, comme ci-dessous :
 
-\paragraph*{Exemple 1.2. Installation sous RedHat Linux 9}
-
-\begin{lstlisting}
+\begin{example}[Installation sous RedHat Linux 9]
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 [root@localhost root]# wget http://python.org/ftp/python/2.3/rpms/redhat-9/python2.3-2.3-5pydotorg.i386.rpm
@@ -206,6 +206,7 @@ Type "help", "copyright", "credits", or "license" for more information.
 [root@localhost root]# which python2.3 (3)
 /usr/bin/python2.3
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
     \item{Attention ! Taper simplement python lance l'ancienne version de Python (celle qui était installée par défaut). Ce n'est pas celle que vous voulez.}
@@ -218,9 +219,8 @@ Type "help", "copyright", "credits", or "license" for more information.
 
 Si vous avez la chance d'utiliser Debian GNU/Linux, vous pouvez installer Python à l'aide de la commande apt.
 
-\paragraph*{Exemple 1.3. Installation sous Debian GNU/Linux}
-
-\begin{lstlisting}
+\begin{example}[Installation sous Debian GNU/Linux]
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 localhost:~# apt-get install python
@@ -253,15 +253,16 @@ Python 2.3.1 (#2, Sep 24 2003, 11:39:14)
 Type "help", "copyright", "credits" or "license" for more information.
 >>> [press Ctrl+D to exit]
 \end{lstlisting}
+\end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Installation de Python à partir du fichier source}\label{Installation de Python à partir du fichier source}
 
-Si vous préférez installer à partir du fichier source, vous pouvez télécharger le code source de Python à partir de \url{http://www.python.org/ftp/python/2.3.3/}. Sélectionnez le numéro de version le plus haut de la liste, téléchargez le fichier .tgz et faites la séquence habituelle configure, make, make install.
+Si vous préférez l'installer à partir du fichier source, vous pouvez télécharger le code source de Python à partir de \url{http://www.python.org/ftp/python/2.3.3/}. Sélectionnez le numéro de version le plus haut de la liste, téléchargez le fichier \emph{.tgz} et appliquez la séquence habituelle \emph{configure}, \emph{make} et \emph{make install}.
 
 \subsection*{Installation à partir du fichier source}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=none]
 localhost:~$ su -
 Password: [enter your root password]
 localhost:~# wget http://www.python.org/ftp/python/2.3/Python-2.3.tgz
@@ -303,12 +304,12 @@ localhost:~$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{L'interface interactive}\label{L'interface interactive}
 
-Maintenant que Python est installé, nous allons voir en quoi consiste cette interface interactive que vous avez lancé.
+Maintenant que Python est installé, nous allons voir en quoi consiste cette interface interactive que vous avez lancée.
 Il faut comprendre une chose : Python mène une double vie. C'est un interpréteur de scripts que vous pouvez lancer depuis la ligne de commande, ou en double-cliquant sur un script. Mais c'est aussi une interface interactive qui peut évaluer n'importe quelle instruction ou expression. C'est très utile pour le débogage, pour écrire rapidement du code et pour les tests. Je connais même des gens qui utilisent l'interface interactive de Python comme calculatrice !
 
 Lancez l'interface interactive de Python de la manière qui convient à la plate-forme et commençons la plongée par les étapes suivantes :
 
-\paragraph*{Exemple 1.5. Premiers pas dans l'interface interactive}
+\begin{example}[Premiers pas dans l'interface interactive]
 
 \begin{lstlisting}
 >>> 1 + 1               (1)
@@ -320,6 +321,7 @@ hello world
 >>> x + y
 3
 \end{lstlisting}
+\end{example}
 
 \begin{enumerate}
     \item{L'interface interactive de Python peut évaluer une expression Python quelconque, y compris une expression arithmétique de base.}
@@ -333,7 +335,7 @@ hello world
 Vous devez maintenant avoir une version de Python installée et fonctionnelle.
 
 \medskip
-En fonction de votre plate-forme, vous pouvez avoir plus d'une version de Python installée. Si c'est le cas, vous devez connaître vos chemins d'accès. Si  entrer simplement  «~python~»  sur la ligne de commande ne lance pas la version de Python que vous souhaitez utiliser, vous aurez peut être à entrer le chemin complet  de votre version préférée.
+En fonction de votre plate-forme, vous pouvez avoir plus d'une version de Python installée. Si c'est le cas, vous devez connaître vos chemins d'accès. Si entrer simplement  «~python~»  sur la ligne de commande ne lance pas la version de Python que vous souhaitez utiliser, vous aurez peut être à entrer le chemin completde votre version préférée.
 
 \medskip
 Félicitations et bienvenue dans le monde de Python !
