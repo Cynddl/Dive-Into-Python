@@ -1,0 +1,758 @@
+\chapter{Le pouvoir de l’introspection}
+% chapitre 4
+
+Ce chapitre traite d’une des forces de Python : l’introspection. Comme vous le savez, tout est objet dans Python, l’introspection consiste à considérer des modules  et des fonctions en mémoire comme des objets, à obtenir des informations de leur part et à les manipuler. Au cours du chapitre, nous définirons des fonctions sans nom, nous appellerons des fonctions avec les arguments dans le désordre et nous référencerons des fonctions dont nous ne connaissons même pas le nom à d’avance.
+
+\section{Plonger}
+
+Voici un programme Python complet et fonctionnel. Vous devriez en comprendre une grande partie rien qu’en le lisant. Les lignes numérotées illustrent des concepts traités dans Chapitre 2, Votre premier programme Python. Ne vous inquiétez pas si le reste du code a l’air intimidant, vous en apprendrez tous les aspects au cours de ce chapitre.
+
+\begin{example}[apihelper.py]
+Si vous ne l’avez pas déjà fait, vous pouvez télécharger\footnote{\url{ http://diveintopython.org/download/diveintopython-examples-5.4.zip}} cet exemple ainsi que les autres exemples du livre.
+
+\begin{lstlisting}
+def info(object, spacing=10, collapse=1): (1) (2) (3)
+    """Print methods and doc strings.
+
+    Takes module, class, list, dictionary, or string."""
+    methodList = [method for method in dir(object) if callable(getattr(object, method))]
+    processFunc = collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
+    print "\n".join(["%s %s" %
+                      (method.ljust(spacing),
+                       processFunc(str(getattr(object, method).__doc__)))
+                     for method in methodList])
+
+if __name__ == "__main__":                (4) (5)
+    print info.__doc__
+\end{lstlisting}
+\end{example}
+
+\begin{itemize}
+    \item{Ce module a une fonction, info. Selon sa déclaration de fonction, elle prend trois paramètres : object, spacing et collapse. Les deux derniers sont en fait des paramètres optionnels comme nous le verrons bientôt.}
+    \item{La fonction \emph{info} a une doc string multi-lignes qui décrit succinctement son usage. Notez qu’aucune valeur de retour n’est mentionnée, cette fonction sera employée uniquement pour son effet, pas sa valeur.}
+    \item{Le code à l’interieur de la fonction est indenté.}
+    \item{L’astuce \emph{if \_\_name\_\_} permet à ce programme de faire quelque chose d’utile lorsqu’il est exécuté tout seul sans interférence avec son usage comme module pour d’autres programmes. Dans ce cas, le programme affiche simplement la \emph{doc string} de la fonction \emph{info}.}
+    \item{L’instruction \emph{if} utilise \emph{==} pour la comparaison et ne nécessite pas de parenthèses.}
+\end{itemize}
+
+La fonction info est conçue pour être utilisée par vous, le programmeur, lorsque vous travaillez dans l’IDE Python. Elle prend n’importe quel objet qui a des fonctions ou des méthodes (comme un module, qui a des fonction, ou une liste, qui a des méthodes) et affiche les fonctions et leur doc string. 
+
+\begin{example}[Exemple d'utilisation de apihelper.py]
+\begin{lstlisting}
+>>> from apihelper import info
+>>> li = []
+>>> info(li)
+append      L.append(object) -- append object to end
+count       L.count(value) -> integer -- return number of occurrences of value
+extend      L.extend(list) -- extend list by appending list elements
+index       L.index(value) -> integer -- return index of first occurrence of value
+insert      L.insert(index, object) -- insert object before index
+pop         L.pop([index]) -> item -- remove and return item at index (default last)
+remove      L.remove(value) -- remove first occurrence of value
+reverse     L.reverse() -- reverse *IN PLACE*
+sort        L.sort([cmpfunc]) -- sort *IN PLACE*; if given, cmpfunc(x, y) -> -1, 0, 1
+\end{lstlisting}
+\end{example}
+
+Par défaut, la sortie est formatée pour être facilement lisible. Les doc string multi-lignes sont combinées en une seule longue ligne, mais cette option peut-être changée en spécifiant 0 pour l’argument collapse. Si les noms de fonction font plus de 10 caractères, vous pouvez spécifier une valeur plus grande pour l’argument  spacing, pour faciliter la lecture.
+
+\begin{example}[Utilisation avancée de apihelper.py]
+\begin{lstlisting}
+>>> import odbchelper
+>>> info(odbchelper)
+buildConnectionString          Build a connection string from a dictionary Returns string.
+>>> info(odbchelper, 30)
+buildConnectionString          Build a connection string from a dictionary Returns string.
+>>> info(odbchelper, 30, 0)
+buildConnectionString          Build a connection string from a dictionary
+
+    Returns string.
+\end{lstlisting}
+\end{example}
+
+\section{Arguments optionnels et nommés}
+
+Python permet aux arguments de fonction d’avoir une valeur par défaut, si la fonction est appelée sans l’argument il a la valeur par défaut. De plus, les arguments peuvent être donnés dans n’importe quel ordre en utilisant les arguments nommés. Les procédures stockées de Transact/SQL sous SQL Server peuvent faire la  même chose, si vous êtes un as des scripts sous SQL Server,vous pouvez survoler cette partie.
+
+\medskip
+Voici un exemple de info, une fonction avec deux arguments optionnels :
+\begin{lstlisting}
+def info(object, spacing=10, collapse=1):
+\end{lstlisting}
+
+\emph{spacing} et \emph{collapse} sont optionnels car ils ont des valeurs par défaut définies. \emph{object} est obligatoire car il n’a pas de valeur par défaut. Si \emph{info} est appelé avec un seul argument, \emph{spacing} prend pour valeur 10 et \emph{collapse} la valeur 1. Si info est appelé avec deux arguments, collapse prend encore pour valeur 1.
+
+Imaginez que vous vouliez spécifier une valeur pour collapse mais garder la valeur par défaut pour spacing. Dans la plupart des langages, vous ne pouvez pas le faire, vous auriez à spécifier les trois arguments. Mais en Python, les arguments peuvent être spécifiés par leur nom, dans n’importe quel ordre. 
+
+\begin{example}[Appels de info autorisés]
+\begin{lstlisting}
+info(odbchelper)                                (1)
+info(odbchelper, 12)                            (2)
+info(odbchelper, collapse=0)                    (3)
+info(spacing=15, object=odbchelper)             (4)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Avec un seul argument, spacing prend pour valeur 10 et collapse 1.}
+    \item{Avec deux arguments, collapse prend pour valeur 1.}
+    \item{Ici, vous nommez l’argument collapse explicitement et spécifiez sa valeur. spacing prend la valeur par défaut 10.}
+    \item{Les arguments obligatoires (comme \emph{object}, qui n’a pas de valeurs par défaut) peuvent aussi être nommés et les arguments nommés peuvent apparaître dans n’importe quel ordre.}
+\end{enumerate}
+
+Cela a l’air confus jusqu’à que vous réalisiez que les arguments sont tout simplement un dictionnaire. La manière « normale » d’appeler les fonctions sans le nom des arguments est en fait un raccourci dans lequel Python fait correspondre les valeurs avec le nom des arguments dans l’ordre dans lequel ils sont spécifiés par la déclaration de fonction. Dans la plupart des cas, vous appellerez le fonctions de la manière « normale », mais vous aurez toujours cette souplesse pour les autres cas.
+
+\note{Python vs. Java : listes}{
+L’appel de fonctions est souple La seule chose que vous avez à faire pour appeler une fonction est de spécifier une valeur (d’une manière ou d’une autre) pour chaque argument obligatoire, la manière et l’ordre dans lequel vous le faites ne dépendent que de vous.}
+
+\noindent Pour en savoir plus : \\
+Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} traite de manière précise de quand et comment les arguments par défaut sont évalués \footnote{\url{http://www.python.org/doc/current/tut/node6.html\#SECTION006710000000000000000}} ), ce qui est important lorsque la valeur par défaut est une liste ou une expression ayant un effet de bord.
+
+\section{Utilisation de \emph{type}, \emph{str}, \emph{dir} et autres fonction prédéfinies}
+
+Python a un petit ensemble de fonctions prédéfinies très utiles. Toutes les autres fonctions sont réparties dans des modules. C’est une décision de conception consciente, afin d’éviter au langage de trop grossir comme d’autres langages de script (au hasard, Visual Basic).
+
+\subsection{La fonction \emph{type}}
+
+La fonction \emph{type} retourne le type de données d’un objet quelconque. Les types possibles sont répertoriés dans le module \emph{types}. C’est utile pour les fonctions capables de gérer plusieurs types de données.
+
+\begin{example}[Présentation de type]
+\begin{lstlisting}
+>>> type(1)           (1)
+<type 'int'>
+>>> li = []
+>>> type(li)          (2)
+<type 'list'>
+>>> import odbchelper
+>>> type(odbchelper)  (3)
+<type 'module'>
+>>> import types      (4)
+>>> type(odbchelper) == types.ModuleType
+True
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{\emph{type} prend n’importe quel argument et retourne son type de données. Je dis bien n’importe lequel : entiers, chaînes, listes, dictionnaires, tuples, fonctions,  classes, modules et même types.}
+    \item{\emph{type} peut prendre une variable et retourne son type de données.}
+    \item{\emph{type} fonctionne aussi avec les modules.}
+    \item{Vous pouvez utiliser les constantes du module \emph{types} pour comparer les types des objets. C’est ce que fait la fonction \emph{info}, comme nous le verrons bientôt.}
+\end{enumerate}
+
+\subsection{La fonction \emph{str}}
+
+La fonction \emph{str} convertit des données en chaîne. Tous les types de données peuvent être convertis en chaîne.
+
+\begin{example}[Présentation de str]
+\begin{lstlisting}
+>>> str(1)          (1)
+'1'
+>>> horsemen = ['war', 'pestilence', 'famine']
+>>> horsemen
+['war', 'pestilence', 'famine']
+>>> horsemen.append('Powerbuilder')
+>>> str(horsemen)   (2)
+"['war', 'pestilence', 'famine', 'Powerbuilder']"
+>>> str(odbchelper) (3)
+"<module 'odbchelper' from 'c:\\docbook\\dip\\py\\odbchelper.py'>"
+>>> str(None)       (4)
+'None'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Pour des types simples comme les entiers, il semble normal que \emph{str} fonctionne, presque tous les langages ont une fonction de conversion d’entier en chaîne.}
+    \item{Cependant, \emph{str} fonctionne pour les objets de tout type. Ici, avec une liste que nous avons construit petit à petit.}
+    \item{\emph{str} fonctionne aussi pour les modules. Notez que la représentation en chaîne du module comprend le chemin du module sur le disque, la votre sera}
+    \item{Un aspect subtil mais important du comportement de \emph{str} est qu’elle fonctionne pour \emph{None}, la valeur nulle de Python. Elle retourne la chaîne \emph{'None'}. Nous  utiliserons cela à notre avantage dans la fonction \emph{info}, comme nous le verrons bientôt.}
+\end{enumerate}
+
+Au cœur de notre fonction \emph{info}, il y a la puissante fonction \emph{dir}. \emph{dir} retourne une liste des attributs et méthodes de n’importe quel objet : module, fonction, chaîne, liste, dictionnaire… à peu près tout.
+
+\begin{example}[Introducing dir]
+\begin{lstlisting}
+>>> li = []
+>>> dir(li)           (1)
+['append', 'count', 'extend', 'index', 'insert',
+'pop', 'remove', 'reverse', 'sort']
+>>> d = {}
+>>> dir(d)            (2)
+['clear', 'copy', 'get', 'has_key', 'items', 'keys', 'setdefault', 'update', 'values']
+>>> import odbchelper
+>>> dir(odbchelper)   (3)
+['__builtins__', '__doc__', '__file__', '__name__', 'buildConnectionString']
+\end{lstlisting}
+\end{example}
+
+\begin{itemize}
+\item{\emph{li} est une liste, donc \emph{dir(li)} retourne la liste de toutes les méthodes de liste. Notez que la liste retournée comprend les noms des méthodes sous forme de chaînes, pas les méthodes elles-mêmes.}
+\item{\emph{d} est un dictionnaire, donc \emph{dir(d)} retourne la liste des noms de méthodes de dictionnaire. Au moins l’un de ces noms, \emph{keys}, devrait être familier.}
+\item{C’est ici que cela devient vraiment intéressant. \emph{odbchelper} est un module, donc \emph{dir(odbchelper)} retourne la liste de toutes les choses définies dans le module, y compris le attributs prédéfinis comme \emph{\_\_name\_\_} et \emph{\_\_doc\_\_} et tout attribut et méthode que vous définissez. Dans ce cas, \emph{odbchelper} a une seule méthode définie par l’utilisateur, la fonction \emph{buildConnectionString} que nous avons étudiée au Chapitre 2.}
+\end{itemize}
+
+Enfin, la fonction \emph{callable} prend n’importe quel objet et retourne \emph{True} si l’objet peut être appelé, sinon \emph{False}. Les objets appelables sont les fonctions, les méthodes de classes ainsi que les classes elles-mêmes (nous étudierons les classes au prochain chapitre).
+
+\begin{example}[Présentation de callable]
+\begin{lstlisting}
+>>> import string
+>>> string.punctuation           (1)
+'!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+>>> string.join                  (2)
+<function join at 00C55A7C>
+>>> callable(string.punctuation) (3)
+False
+>>> callable(string.join)        (4)
+True
+>>> print string.join.__doc__    (5)
+join(list [,sep]) -> string
+
+    Return a string composed of the words in list, with
+    intervening occurrences of sep.  The default separator is a
+    single space.
+
+    (joinfields and join are synonymous)
+\end{lstlisting}
+\end{example}
+
+\begin{itemize}
+    \item{Les fonctions du module \emph{string} sont dépréciées (bien que beaucoup de gens utilisent encore la fonction \emph{join}), mais le module comprend un grand nombre de constantes utiles comme \emph{string.punctuation}, qui comprend tous les caractères de ponctuation standards.}
+    \item{string.join est une fonction qui effectue la jointure d’une liste de chaînes.}
+    \item{string.punctuation n’est pas appelable, c’est une chaîne. (Une chaîne a des méthodes appelables, mais elle n’est pas elle-même appelable).}
+    \item{\emph{string.join} est appelable, c’est une fonction qui prend deux arguments.}
+    \item{Tout objet appelable peut avoir une \emph{doc string}. En utilisant la fonction callable sur chacun des attributs d’un objet, nous pouvons déterminer les attributs qui nous intéressent (méthodes, fonctions et classes) et ce que nous voulons ignorer (constantes etc.) sans savoir quoi que ce soit des objets à l’avance.}
+\end{itemize}
+
+\subsection{Fonctions prédéfinies}
+
+\emph{type}, \emph{str}, \emph{dir} et toutes les autres fonctions prédéfinies de Python sont regroupés dans un module spécial appelé \emph{\_\_builtin\_\_}. (Il y a deux caractères de soulignement avant et deux après.) Pour vous aider, vous pouvez imaginer que Python exécute automatiquement \emph{from \_\_builtin\_\_ import *} au démarrage, ce quiimporte toutes les fonctions prédéfinies (built-in) dans l’espace de noms pourque vous puissiez les utiliser directement.
+
+L’avantage d’y penser de cette manière est que vous pouvez accéder à toutes les fonctions et attributs prédéfinis de manière groupée en obtenant des informations sur le module \_\_builtin\_\_. Et devinez quoi, nous avons une fonction pour ça, elle s’appelle \emph{info}. Essayez vous-même et parcourez la liste maintenant, nous examinerons certaines des fonctions les plus importantes plus tard (certaines des classes d’erreur prédéfinies, comme \emph{AttributeError}, devraient avoir l’air familier).
+
+\begin{example}[Attributs et fonctions prédéfinis]
+\begin{lstlisting}
+>>> from apihelper import info
+>>> import __builtin__
+>>> info(__builtin__, 20)
+ArithmeticError      Base class for arithmetic errors.
+AssertionError       Assertion failed.
+AttributeError       Attribute not found.
+EOFError             Read beyond end of file.
+EnvironmentError     Base class for I/O related errors.
+Exception            Common base class for all exceptions.
+FloatingPointError   Floating point operation failed.
+IOError              I/O operation failed.
+
+[...snip...]
+\end{lstlisting}
+\end{example}
+
+\note{Python est auto-documenté}{
+Python est fourni avec d’excellent manuels de référence que vous devriez parcourir de manière exhaustive pour apprendre tous les modules que Python offre. Mais  alors que dans la plupart des langages vous auriez à vous référer constamment aux manuels (ou aux pages man, ou pire, à MSDN) pour vous rappeler l’usage de  ces modules, Python est en grande partie auto-documenté.}
+
+\paragraph*{Pour en savoir plus sur les fonctions prédéfinies}
+
+\begin{itemize}
+\item La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} documente toutes les fonctions prédéfinies\footnote{\url{http://www.python.org/doc/current/lib/built-in-funcs.html}} et toutes les exceptions prédéfinies\footnote{\url{http://www.python.org/doc/current/lib/module-exceptions.html}}.
+\end{itemize}
+
+\section{Obtenir des références objet avec \emph{getattr}}
+
+Vous savez déjà que les fonctions Python sont des objets. Ce que vous ne savez pas, c’est que vous pouvez obtenir une référence à une fonction sans connaître son nom avant l’exécution, à l’aide de la fonction \emph{getattr}.
+
+\begin{example}[Présentation de \emph{getattr}]
+\begin{lstlisting}
+>>> li = ["Larry", "Curly"]
+>>> li.pop                       (1)
+<built-in method pop of list object at 010DF884>
+>>> getattr(li, "pop")           (2)
+<built-in method pop of list object at 010DF884>
+>>> getattr(li, "append")("Moe") (3)
+>>> li
+["Larry", "Curly", "Moe"]
+>>> getattr({}, "clear")         (4)
+<built-in method clear of dictionary object at 00F113D4>
+>>> getattr((), "pop")           (5)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+AttributeError: 'tuple' object has no attribute 'pop'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Ceci retourne une référence à la méthode pop de la liste. Ce n’est pas un appel à la méthode pop, un appel se ferait par \emph{li.pop()}. C’est la méthode elle-même.}
+    \item{Ceci retourne également une référence à la méthode pop, mais cette fois ci le nom de la méthode est passé comme argument de la fonction \emph{getattr}. getattr est une fonction prédéfinie extrèmement utile qui retourne n’importe quel attribut de n’importe quel objet. Ici, l’objet est une liste et l’attribut est la méthode \emph{pop}.}
+    \item{Au cas où vous ne voyez pas à quel point c’est utile, regardez ceci : la valeur de retour de getattr est la méthode, que vous pouvez alors appeler comme si vous aviez tapé \emph{li.append("Moe")} directement. Mais vous n’avez pas appelé la fonction directement, vous avez passé le nom de la fonction comme paramètre sous forme de chaîne.}
+    \item{\emph{getattr} fonctionne aussi avec les dictionnaires.}
+    \item{En théorie, \emph{getattr} pourrait fonctionner avec les tuples, mais les tuples n’ont pas de méthodes et \emph{getattr} déclenchera une exception quel que soit le nom d’attribut que vous lui donnez.}
+\end{enumerate}
+
+\subsection{getattr et les modules}
+
+\emph{getattr} n’est pas seulement fait pour les types prédéfinis, il fonctionne aussi avec les modules.
+
+\begin{example}[getattr dans apihelper.py]
+\begin{lstlisting}
+>>> import odbchelper
+>>> odbchelper.buildConnectionString             (1)
+<function buildConnectionString at 00D18DD4>
+>>> getattr(odbchelper, "buildConnectionString") (2)
+<function buildConnectionString at 00D18DD4>
+>>> object = odbchelper
+>>> method = "buildConnectionString"
+>>> getattr(object, method)                      (3)
+<function buildConnectionString at 00D18DD4>
+>>> type(getattr(object, method))                (4)
+<type 'function'>
+>>> import types
+>>> type(getattr(object, method)) == types.FunctionType
+True
+>>> callable(getattr(object, method))            (5)
+True
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Ceci retourne une référence à la fonction \emph{buildConnectionString} du module \emph{odbchelper}, que nous avons étudié au Chapitre 2, Votre premier programme Python. (L’adresse hexadécimale qui s’affiche est spécifique à ma machine, votre sortie sera différente.)}
+    \item{A l’aide de getattr, nous pouvons obtenir la même référence à la même fonction. En général, \emph{getattr(objet, "attribut")} est équivalent à
+    \emph{objet.attribut}. Si objet est un module, alors attribut peut être toute
+    chose définie dans le module : une fonction, une classe ou une variable
+    globale.}
+    \item{Voici ce que nous utilisons dans la fonction \emph{info}. \emph{object} est passé en argument à la fonction, \emph{method} est une chaîne, le nom de la méthode ou de la fonction.}
+    \item{Dans ce cas, \emph{method} est le nom d’une fonction, ce que nous prouvons en obtenant son type.}
+    \item{Puisque \emph{method} est une fonction, elle est callable (appelable).}
+\end{enumerate}
+
+\subsection{\emph{getattr} comme sélecteur}
+
+Une utilisation usuelle de \emph{getattr} est dans le rôle de sélecteur. Par exemple, si vous avez un programme qui peut produire des données dans différents formats, vous pouvez définir des fonctions différentes pour chaque format de sortie et utiliser une fonction de sélection pour appeler celle qui convient.
+
+Par exemple, imaginons un programme qui affiche des statistiques de consultations d'un site Web aux formats HTML, XML et texte simple. Le choix du format de sortie peut être spécifié depuis la ligne de commande ou stocké dans un fichier de configuration. Un module statsout définit trois fonctions, output\_html, output\_xml et output\_text. Ensuite, le programme principal définitune fonction de sortie unique, comme ceci :
+
+\begin{example}[Création d'un sélecteur avec \emph{getattr}]
+\begin{lstlisting}
+import statsout
+
+def output(data, format="text"):                                            (1)
+    output_function = getattr(statsout, "output_%s" % format) (2)
+    return output_function(data)                                             (3)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{La fonction \emph{output} prend un argument obligatoire, \emph{data}, et un argument optionnel, \emph{format}. Si \emph{format} n'est pas spécifié, il a la valeur par défaut \emph{text} ce qui appelera la fonction de sortie en texte simple.}
+    \item{Nous concaténons l'argument format à «~output\_~» pour produire un nom de fonction et allons chercher cette fonction dans le module \emph{statsout}. Cela nous  permet d'étendre simplement le programme plus tard pour supporter d'autres formats de sortie, sans changer la fonction de sélection. Il suffit d'ajouter une autre fonction à \emph{statsout} nommée, par exemple, output\_pdf et de passer «~pdf~» comme format à la fonction \emph{output}.}
+    \item{Maintenant, nous pouvons simplement appeler la fonction de sortie comme toute autre fonction. La variable \emph{output\_function} est une référence à la fonction appropriée du module \emph{statsout}.}
+\end{enumerate}
+
+Avez vous vu le problème dans l'exemple précédent ? Il y a un couplage très lâche entre chaînes et fonctions et il n'y a aucune vérification d'erreur. Que se passe-t-il si l'utilisateur passe un format pour lequel aucune fonction correspondante n'est définie dans le module statsout ? Et bien, \emph{getattr} retournera \emph{None}, qui sera assigné à  \emph{output\_function} au lieu d'une fonction valide et à la ligne suivante, qui tente d'appeler cette fonction inexistante, plantera et déclenchera une exception. C'est un problème.
+
+Heureusement \emph{getattr} prend un troisième argument optionnel, une valeur par défaut.
+
+\begin{example}[Valeurs par défaut de getattr]
+\begin{lstlisting}
+import statsout
+
+def output(data, format="text"):
+    output_function = getattr(statsout, "output_%s" % format, statsout.output_text)
+    return output_function(data) (1)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Cet appel de fonction est assuré de fonctionner puisque nous avons ajouté un troisième argument à l'appel à getattr. Le troisième argument est une valeur par défaut qui est retournée si l'attribut ou la méthode spécifié par le second argument n'est pas trouvé.}
+\end{enumerate}
+
+Comme vous pouvez le voir, \emph{getattr} est très puissant. C'est le cœur même de l'introspection et vous en verrez des exemples encore plus puissants dans des prochains chapitres.
+
+\subsection{Filtrage de listes}
+
+Comme vous le savez, Python a des moyens puissant de mutation d’une liste en une autre, au moyen des list comprehensions (Section 3.6, «~Mutation de listes~»). Cela peut être associé à un mécanisme de filtrage par lequel certains éléments sont modifiés alors que d’autres sont totalement ignorés. 
+
+\medskip
+\noindent Voici la syntaxe du filtrage de liste :
+\begin{lstlisting}
+[mapping-expression for element in source-list if filter-expression]
+\end{lstlisting}
+
+C’est une extension des \emph{list comprehensions} que vous connaissez et appréciez. Les deux premiers tiers sont identiques, la dernière partie, commençant par le \emph{if}, est l’expression de filtrage. Une expression de filtrage peut être n’importe quelle expression qui s’évalue en vrai ou faux (ce qui en Python peut être presque tout). Tout élément pour lequel l’expression de filtrage s’évalue à vrai sera inclu dans la liste à transformer. Tous les autres éléments seront ignorés, il ne passeront jamais par l’expression de mutation et ne seront pas inclus dans la liste retournée.
+
+\begin{example}[Présentation du filtrage de liste]
+\begin{lstlisting}
+>>> li = ["a", "mpilgrim", "foo", "b", "c", "b", "d", "d"]
+>>> [elem for elem in li if len(elem) > 1]       (1)
+['mpilgrim', 'foo']
+>>> [elem for elem in li if elem != "b"]         (2)
+['a', 'mpilgrim', 'foo', 'c', 'd', 'd']
+>>> [elem for elem in li if li.count(elem) == 1] (3)
+['a', 'mpilgrim', 'foo', 'c']
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{L’expression de mutation est ici très simple (elle retourne juste la valeur de chaque élément), observez plutôt attentivement l’expression de filtrage. Au fur et à mesure que Python parcours la liste, il soumet chaque élément à l’expression de filtrage, si l’expression s’évalue à vrai, l’élément passe par l’expression de mutation et le résultat est inclu dans la liste de résultat. Ici, on filtre toutes les chaînes d’un seul caractère, il ne reste donc que les chaînes plus longues.}
+    \item{Ici, on filtre une valeur spécifique : \emph{b}. Notez que cela filtre toutes les occurences de b, puisqu’à chaque fois qu’il apparaît, l’expression de filtrage s’évaluera à faux.}
+    \item{count est une méthode de listes qui retourne le nombre d’occurences d’une valeur dans la liste. On pourrait penser que ce filtre élimine les doublons de la liste, retournant une liste contenant seulement un exemplaire de chaque valeur. Mais en fait, les valeurs qui apparaissent deux fois dans la liste initiale (ici \emph{b} et \emph{d}) sont totalement éliminées. Il y a des moyens de supprimer les doublons d’une liste mais le filtrage n’est pas la solution.}
+\end{enumerate}
+
+Revenons à cette ligne de apihelper.py:
+\begin{lstlisting}
+    methodList = [method for method in dir(object) if callable(getattr(object, method))]
+\end{lstlisting}
+
+Cela à l’air complexe et ça l’est, mais la structure de base est la même. L’expression complète renvoie une liste qui est assignée à la variable \emph{methodList}. La première moitié de l’expression est la mutation de liste. L’expression de mutation est une expression d’identité, elle retourne la valeur de chaque élément. \emph{dir(object)}  retourne une liste des attributs et méthodes de object, c’est à cette liste que vous appliquez la mutation. La seule nouveauté est l’expression après le \emph{if}.
+
+L’expression de filtrage à l’air impressionant, mais elle n’est pas si terrible. Vous connaissez déjà callable, \emph{getattr} et \emph{in}. Comme vous l’avez vu dans la section précédente, l’expression \emph{getattr(object, method)} retourne un objet fonction si \emph{object} est un module et si \emph{method} est le nom d’une fonction de ce module.
+
+Donc, cette expression prend un objet, appelé object, obtient une liste des noms de ses attributs, méthodes, fonctions et quelques autres choses, puis filtre cette  liste pour éliminer ce qui ne nous intéresse pas. Cette élimination se fait en prenant le nom de chaque attribut/méthode/fonction et en obtenant une référence vers l’objet véritable, grâce à la fonction \emph{getattr}. On vérifie alors si cet objet est appelable, ce qui sera le cas pour toutes les méthodes et fonctions prédéfinies (comme la méthode pop d’une liste) ou définies par l’utilisateur (comme la fonction \emph{buildConnectionString} du module \emph{odbchelper}). Nous ne nous intéressons pas aux autres attributs, commel’attribut \_\_name\_\_ qui existe pour tout module.
+
+\medskip
+\noindent Pour en savoir plus sur le filtrage de liste : le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} traite d’une autre manière de filtrer les listes en utilisant la fonction prédéfinie \emph{filter}\footnote{\url{http://www.python.org/doc/current/tut/node7.html\#SECTION007130000000000000000}}.
+
+\section{Particularités de \emph{and} et \emph{or}}
+
+En Python, \emph{and} et \emph{or} appliquent la logique booléenne comme vous pourriez l’attendre, mais ils ne retournent pas de valeurs booléennes, ils retournent une des valeurs comparées.
+
+\begin{example}[Présentation de and]
+\begin{lstlisting}
+>>> 'a' and 'b'         (1)
+'b'
+>>> '' and 'b'          (2)
+''
+>>> 'a' and 'b' and 'c' (3)
+'c'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Lorsqu’on utilise \emph{and} les valeurs sont évaluées dans un contexte booléen de gauche à droite. \emph{0}, \emph{''}, \emph{[]}, \emph{()}, \emph{\{\}} et \emph{none} valent faux dans ce contexte, tout le reste vaut vrai.\footnote{Presque tout, en fait. Par défaut, les instances de classes valent «~vrai~» dans un contexte booléen mais vous pouvez définir des méthodes spéciales de votre classe pour faire qu’une instance vale «~faux~». Vous apprendrez tout sur les classes et les méthodes spéciales au Chapitre 5.} Si toutes les valeurs valent vrai dans un contexte booléen, «~and~» retourne la dernière valeur. Ici \emph{and} évalue «~a~», qui vaut vrai, puis «~b~», qui vaut vrai et retourne «~b~».}
+    \item{Si une des valeurs vaut faux and retourne la première valeur fausse. Ici «~''~»est la première valeur fausse.}
+    \item{Toutes les valeurs sont vrai, donc and retourne la dernière valeur, «~c~».}
+\end{enumerate}
+
+\begin{example}[Présentation de or]
+\begin{lstlisting}
+>>> 'a' or 'b'              (1)
+'a'
+>>> '' or 'b'               (2)
+'b'
+>>> '' or [] or {}          (3)
+{}
+>>> def sidefx():
+...     print "in sidefx()"
+...     return 1
+>>> 'a' or sidefx()         (4)
+'a'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Lorsqu’on utilise \emph{or}, les valeurs sont évaluées dans un contexte booléen de gauche à droite, comme pour \emph{and}. Si une des valeurs vaut vrai, or la retourne immédiatement. Dans ce cas \emph{'a'} est la première valeur vraie.}
+    \item{\emph{or} évalue \emph{''}, qui vaut faux, puis \emph{'b'}, qui vaut vrai et retourne \emph{'b'}.}
+    \item{Si toutes les valeurs valent faux, or retourne la dernière valeur. \emph{or} évalue \emph{''}, qui vaut faux, puis \emph{[]}, qui vaut faux, puis \emph{\{\}}, qui vaut faux et retourne {}.}
+    \item{Notez que \emph{or} continue l’évaluation seulement jusqu’à ce qu’il trouve une valeur vraie, le reste est ignoré. C’est important si certaines valeurs peuvent avoir un effet de bord. Ici, la fonction \emph{sidefx} n’est jamais appelée, car \emph{or} évalue \emph{'a'}, qui vaut vrai et retourne \emph{'a'} immédiatement.}
+\end{enumerate}
+
+\medskip
+Si vous êtes un programmeur C, vous êtes certainement familier de l’expression ternaire \emph{bool ? a : b}, qui s’évalue en \emph{a} si \emph{bool} vaut vrai et à \emph{b} dans le cas contraire. Le fonctionnement de \emph{and} et \emph{or} en Python vous permet d’accomplir la même chose.
+
+\subsection{Utilisation de l'astuce and-or}
+
+\begin{example}[Présentation de l’astuce and-or]
+\begin{lstlisting}
+>>> a = "first"
+>>> b = "second"
+>>> 1 and a or b (1)
+'first'
+>>> 0 and a or b (2)
+'second'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Cette syntaxe ressemble à celle de l’expression ternaire \emph{bool ? a : b} de C. L’expression est évaluée de gauche à droite, donc le and est évalué en premier. \emph{1} and \emph{'first'} s’évalue à \emph{'first'}, puis \emph{'first'} or \emph{'second'} s’évalue à \emph{'first'}.}
+    \item{\emph{0} and \emph{'first'} s’évalue à \emph{0}, puis \emph{0} or \emph{'second'} s’évalue à \emph{'second'}.}
+\end{enumerate}
+
+Cependant, puisque cette expression en Python est simplement de la logique booléenne et non un dispositif spécial du langage, il y a une différence très, très importante entre l’astuce \emph{and-or} en Python et la syntaxe \emph{bool ? a : b} en C. Si \emph{a} vaut faux, l’expression ne fonctionnera pas comme vous vous y attendez\footnote{Vous devinez que cela m’a déjà joué des tours. Et plus d’une fois !}.
+
+\begin{example}[Quand l’astuce and-or échoue]
+\begin{lstlisting}
+>>> a = ""
+>>> b = "second"
+>>> 1 and a or b         (1)
+'second'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Puisque \emph{a} est une chaîne vide, ce que Python évalue à faux dans un contexte booléen, \emph{1 and ''} s’évalue à \emph{''}, puis \emph{'' or 'second'} s’évalue à \emph{'second'}. Zut ! Ce n’est pas ce que nous voulions.}
+\end{enumerate}
+
+L’astuce \emph{and-or}, \emph{bool and a or b}, ne fonctionne pas comme l’expression ternaire de C \emph{bool ? a : b} quand \emph{a} s’évalue à faux dans un contexte booléen.
+
+La véritable astuce cachée derrière l’astuce \emph{and-or}, c’est de s’assurer que \emph{a} ne vaut jamais faux. Une manière habituelle de le faire est de changer \emph{a} en \emph{[a]} et \emph{b} en \emph{[b]} et de prendre le premier élément de la liste retournée, qui sera soit \emph{a} soit \emph{b}.
+
+\begin{example}[L’astuce and-or en toute sécurité]
+\begin{lstlisting}
+>>> a = ""
+>>> b = "second"
+>>> (1 and [a] or [b])[0] (1)
+''
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item Puisque \emph{[a]} est une liste non-vide, il ne vaut jamais faux. Même si \emph{a} est \emph{0} ou \emph{''} ou une autre valeur fausse, la liste \emph{[a]} vaut vrai puisqu’elle a un élément.
+\end{enumerate}
+
+\medskip
+On peut penser que cette astuce apporte plus de complication que d’avantages. Après tout, on peut obtenir le même résultat avec une instruction \emph{if}, alors pourquoi s’embarasser de tout ces problèmes ? Mais dans de nombreux cas, le choix se fait entre deux valeurs constantes et donc vous pouvez utiliser cette syntaxe plus simple sans vous inquiéter puisque vous savez que \emph{a} vaudra toujours vrai. Et même si vous devez utiliser la version sûre plus complexe, il y a parfois de bonnes raisons de le faire, il y a des cas en Python où les instructions \emph{if} ne sont pas autorisées, comme dans les fonctions lambda. Pour en savoir plus sur l'astuce \emph{and-or}.
+
+\begin{enumerate}
+    \item Le Python Cookbook\footnote{\url{http://www.activestate.com/ASPN/Python/Cookbook/}} traite des alternatives à l’astuce \emph{and-or}\footnote{\url{http://www.activestate.com/ASPN/Python/Cookbook/Recipe/52310}}.
+\end{enumerate}
+
+\subsection{Utiliser des fonctions lambda}
+
+Python permet une syntaxe intéressante qui vous laisse définir des mini-fonctions d’une ligne à la volée. Empruntées à Lisp, ces fonctions dites lambda peuvent être employées partout où une fonction est nécéssaire.
+
+\begin{example}[Présentation des fonctions lambda]
+\begin{lstlisting}
+>>> def f(x):
+...     return x*2
+...
+>>> f(3)
+6
+>>> g = lambda x: x*2  (1)
+>>> g(3)
+6
+>>> (lambda x: x*2)(3) (2)
+6
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item{Voici une fonction lambda qui fait la même chose que la fonction ordinaire précédente. Notez la syntaxe condensée : il n’y a pas de parenthèses autour de la liste d’arguments et le mot-clé \emph{return }est manquant -- il est implicite, la fonction complète ne pouvant être qu’une seule expression. Remarquez aussi que la fonction n’a pas de nom, mais qu’elle peut être appelée à travers la variable à laquelle elle est assignée.}
+    \item{Vous pouvez utiliser une fonction lambda sans l’assigner à une variable. Ce n’est pas forcément très utile, mais cela démontre qu’une fonction lambda est simplement une fonction en ligne.}
+\end{enumerate}
+
+Plus généralement, une fonction lambda est une fonction qui prend un nombre quelconque d’arguments (y compris des arguments optionnels) et retourne la valeur d’une expression unique. Les fonctions lambda ne peuvent pas contenir de commandes et elles ne peuvent contenir plus d’une expression. N’essayez pas de mettre trop de choses dans une fonction lambda, si vous avez besoin de quelque chose de complexe, définissez plutôt une fonction normale et faites la aussi longue que vous voulez.
+
+\note{Lambda est optionnel}
+{Les fonctions lambda sont une question de style. Les utiliser n’est jamais une nécessité, partout où vous pouvez le faire, vous pouvez utiliser une fonction ordinaire. Je les utilise là où je veux incorporer du code spécifique et non réutilisable sans encombrer mon code de multiples fonctions d’une seule ligne.}
+
+\subsection{Les fonctions lambda dans le monde réel}
+
+Voici les fonctions lambda dans \emph{apihelper.py} :
+
+\begin{lstlisting}
+    processFunc = collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
+\end{lstlisting}
+
+Il y a plusieurs chose à noter ici. D’abord, nous utilisons la forme simple de l’astuce \emph{and-or}, ce qui est sûr car une fonction lambda vaut toujours vrai dans un contexte booléen. Cela ne veut pas dire qu’une fonction lambda ne peut retourner faux. La fonction est toujours vrai, sa valeur de retour peut être vrai ou fausse.
+
+Ensuite, nous utilisons la fonction \emph{split} sans arguments. Vous l’avez déjà vu employée avec un ou deux arguments, sans arguments elle utilise les espaces comme séparateur.
+
+\begin{example}[split sans arguments]
+\begin{lstlisting}
+
+>>> s = "this   is\na\ttest"  (1)
+>>> print s
+this   is
+a       test
+>>> print s.split()           (2)
+['this', 'is', 'a', 'test']
+>>> print " ".join(s.split()) (3)
+'this is a test'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item Voici une chaîne multi-lignes définie à l’aide de caractères d’échappement au lieu de triples guillemets. \emph{\textbackslash{}n} est le retour chariot et \emph{\textbackslash{}t} le caractère de tabulation.
+\item \emph{split} sans arguments fait la séparation sur les espaces. Trois espaces, un retour chariot ou un caractère de tabulation reviennent à la même chose.
+\item Vous pouvez normaliser les espaces en utilisant \emph{split} sur une chaîne et en la joignant par join avec un espace simple comme délimiteur. C’est ce que fait la fonction \emph{info} pour replier les \emph{doc string} sur une seule ligne.
+\end{enumerate}
+
+Mais que fait donc exactement cette fonction info avec ces fonctions lambda, ces split et ces astuces and-or ?
+
+\begin{lstlisting}
+    processFunc = collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
+\end{lstlisting}
+
+
+\emph{processFunc} est maintenant une fonction, mais la fonction qu’elle est dépend de la valeur de la variable \emph{collapse}. Si \emph{collapse} vaut vrai, \emph{processFunc(string)} repliera les espaces, sinon, \emph{processFunc(string)} retournera son argument sans le modifier.
+
+Pour faire la même chose dans un langage moins robuste, tel que Visual Basic, vous auriez sans doute créé une fonction prenant une chaîne et un argument \emph{collapse} qui aurait utilisé une instruction \emph{if} pour décider de replier les espaces ou non, puis aurait retourné la valeur appropriée. Cela serait inefficace car la fonction devrait prendre en compte tous les cas possibles. A chaque fois que vous l’appeleriez, elle devrait décider si elle doit replier l’espace avant de pouvoir vous donner ce que vous souhaitez. En Python, vous pouvez retirer cette prise de décision de la fonction et définir une fonction lambda taillée sur mesure pour vous donner ce que vous voulez et seulement cela. C’est plus efficace, plus élégant et moins sujet à des erreurs dans l’ordre des arguments.
+
+\paragraph{Pour en savoir plus sur les fonctions lambda}
+
+\begin{itemize}
+    \item La Python Knowledge Base\footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/199/}} traite de l’utilisation de lambda pour faire des appels de fonction indirects\footnote{\url{http://www.faqts.com/knowledge-base/view.phtml/aid/6081/fid/241}}.
+    \item Le Python Tutorial\footnote{\url{http://www.python.org/doc/current/tut/tut.html}} montre comment accéder à des variables extérieures de l’intérieur d’une fonction lambda\footnote{\url{http://www.python.org/doc/current/tut/node6.html\#SECTION006740000000000000000}}. (La PEP 227\footnote{\url{http://python.sourceforge.net/peps/pep-0227.html}} explique comment cela va changer dans les futures versions de Python.)
+    \item La The Whole Python FAQ \footnote{\url{http://www.python.org/doc/FAQ.html}} a des exemples de code obscur monoligne utilisant lambda \footnote{\url{http://www.python.org/cgi-bin/faqw.py?query=4.15&querytype=simple&casefold=yes&req=search}}.
+\end{itemize}
+
+\section{Assembler les pièces}
+
+La dernière ligne du code -- la seule que nous n’ayons pas encore déconstruite -- est celle qui fait tout le travail. Mais arrivé à ce point, le travail est simple puisque tous les éléments dont nous avons besoin sont disponibles. Les dominos sont en place, il ne reste qu’à les faire tomber.
+
+\medskip
+\noindent Voici le plat de résistance de \emph{apihelper.py} :
+
+\begin{lstlisting}
+    print "\n".join(["%s %s" %
+                      (method.ljust(spacing),
+                       processFunc(str(getattr(object, method).__doc__)))
+                     for method in methodList])
+\end{lstlisting}
+
+Notez que ce n’est qu’une commande, répartie sur plusieurs lignes sans utiliser le caractère de continuation («~\textbackslash~»). Vous vous rappelez quand j’ai dit que certaines expressions peuvent être divisées en plusieurs lignes sans utiliser de \emph{backslash} ? Une \emph{list comprehension} est une expression de ce type car toute l’expression est entourée de crochets.
+
+\medskip
+Maintenant étudions l’expression de la fin vers le début. L'instruction suivante nous montre qu’il s’agit d’une \emph{list comprehension}. Comme vous le savez, \emph{methodList} est une liste de toutes les méthodes qui nous intéressent dans \emph{object}. Nous parcourons donc cette liste avec \emph{method}.
+
+\begin{lstlisting}
+      for method in methodList
+\end{lstlisting}
+
+\noindent nous montre qu’il s’agit d’une \emph{list comprehension}. Comme vous le savez, \emph{methodList} est une liste de toutes les méthodes qui nous intéressent dans \emph{object}. Nous parcourons donc cette liste avec \emph{method}.
+
+\begin{example}[Obtenir une doc string dynamiquement]
+\begin{lstlisting}
+>>> import odbchelper
+>>> object = odbchelper                   (1)
+>>> method = 'buildConnectionString'      (2)
+>>> getattr(object, method)               (3)
+<function buildConnectionString at 010D6D74>
+>>> print getattr(object, method).__doc__ (4)
+Build a connection string from a dictionary of parameters.
+
+    Returns string.
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item Dans la fonction \emph{info}, \emph{object} est l’objet pour lequel nous demandons de l’aide, passé en argument.
+    \item Pendant que nous parcourons la \emph{methodList}, \emph{method} est le nom de la méthode en cours.
+    \item En utlisant la fonction \emph{getattr}, nous obtenons une référence à la fonction \emph{method} du module \emph{object}.
+    \item Maintenant, afficher la doc \emph{string} de la méthode est facile.
+\end{enumerate}
+
+La pièce suivante du puzzle est l’utilisation de \emph{str} sur la \emph{doc string}. Comme vous vous rappelez peut-être, \emph{str} est une fonction prédéfinie pour convertir des données en chaîne. Mais une \emph{doc string} est toujours une chaîne, alors pourquoi utiliser \emph{str} ? La réponse est que toutes les fonctions n’ont pas de \emph{doc string}, et que l’attribut \emph{\_\_doc\_\_} de celles qui n’en ont pas renvoi \emph{None}.
+
+\begin{example}[Pourquoi utiliser str sur une doc string ?]
+\begin{lstlisting}
+>>> >>> def foo(): print 2
+>>> >>> foo()
+2
+>>> >>> foo.__doc__     (1)
+>>> foo.__doc__ == None (2)
+True
+>>> str(foo.__doc__)    (3)
+'None'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item Nous pouvons facilement définir une fonction qui n’a pas de doc string, sont attribut \emph{\_\_doc\_\_} est None. Attention, si vous évaluez directement l’attribut \emph{\_\_doc\_\_}, l'IDE Python n’affiche rien du tout, ce qui est logique si vous y réflechissez mais n’est pas très utile. 
+    \item Vous pouvez vérifier que la valeur de l’attribut \emph{\_\_doc\_\_} est bien \emph{None} en faisant directement la comparaison.
+    \item Lorsque l’on utilise la fonction \emph{str}, elle prend la valeur nulle et en retourne une représentation en chaîne~: «~\emph{None}~».
+\end{enumerate}
+
+\note{Python vs. SQL : comparaison des valeurs nulles}
+{En SQL, vous devez utiliser \emph{IS NULLmethod} au lieu de \emph{= NULL} pour la comparaison d’une valeur nulle. En Python, vous pouvez utiliser aussi bien \emph{== None} que \emph{is None}, mais \emph{is None} est plus rapide.}
+
+Maintenant que nous sommes sûrs d’obtenir une chaîne, nous pouvons passer la chaîne à \emph{processFunc}, que nous avons déjà défini comme une fonction qui replie ou non les espace. Maintenant vous voyez qu’il était important d’utiliser \emph{str} pour convertir une valeur None en une représentation en chaîne. \emph{processFunc} attend une chaîne comme argument et appelle sa méthode \emph{split}, ce qui échouerait si nous passions \emph{None}, car \emph{None} n’a pas de méthode \emph{split}.
+
+En remontant en arrière encore plus loin, nous voyons que nous utilisons encore le formatage de chaîne pour concaténer la valeur de retour de \emph{processFunc} avec celle de la méthode \emph{ljust} de \emph{method}. C’est une nouvelle méthode de chaîne que nous n’avons pas encore rencontré.
+
+\begin{example}[Présentation de la méthode ljust]
+\begin{lstlisting}
+>>> s = 'buildConnectionString'
+>>> s.ljust(30)                 (1)
+'buildConnectionString'
+>>> s.ljust(20)                 (2)
+'buildConnectionString'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item \emph{ljust} complète la chaîne avec des espaces jusqu’à la longueur donnée. La fonction info l’utilise pour afficher sur deux colonnes et aligner les \emph{doc string} de la seconde colonne.
+    \item Si la longueur donnée est plus petite que la longueur de la chaîne, \emph{ljust} retourne simplement la chaîne sans la changer. Elle ne tronque jamais la chaîne.
+\end{enumerate}
+
+Nous avons presque terminé. Ayant obtenu le nom de méthode complété d’espaces de la méthode \emph{ljust} et la \emph{doc string} (éventuellement repliée sur une ligne) de
+l’appel à \emph{processFunc}, nous concaténons les deux pour obtenir une seule chaîne. Comme nous faisons une mutation de \emph{methodList}, nous obtenons une liste de
+chaînes. En utlisant la méthode \emph{join} de la chaîne \emph{"\textbackslash n"}, nous joignons cette liste en une chaîne unique, avec chaque élément sur une ligne et affichons le résultat…
+
+\begin{example}[Affichage d’une liste]
+\begin{lstlisting}
+>>> li = ['a', 'b', 'c']
+>>> print "\n".join(li)         (1)
+a
+b
+c
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item C’est aussi une astuce de débogage utile lorsque vous travaillez avec des liste. Et en Python, vous travaillez toujours avec des listes.
+\end{enumerate}
+
+C’est la dernière pièce du puzzle. Le code devrait maintenant être parfaitement compréhensible.
+
+\begin{lstlisting}
+    print "\n".join(["%s %s" %
+                      (method.ljust(spacing),
+                       processFunc(str(getattr(object, method).__doc__)))
+                     for method in methodList])
+\end{lstlisting}
+
+\section{Résumé}
+
+Le programme \emph{apihelper.py} et sa sortie devraient maintenant être parfaitement clairs.
+
+\begin{lstlisting}
+def info(object, spacing=10, collapse=1):
+    """Print methods and doc strings.
+
+    Takes module, class, list, dictionary, or string."""
+    methodList = [method for method in dir(object) if callable(getattr(object, method))]
+    processFunc = collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
+    print "\n".join(["%s %s" %
+                      (method.ljust(spacing),
+                       processFunc(str(getattr(object, method).__doc__)))
+                     for method in methodList])
+
+if __name__ == "__main__":
+    print info.__doc__
+\end{lstlisting}
+
+Voici la sortie de \emph{apihelper.py} :
+
+\begin{lstlisting}
+>>> from apihelper import info
+>>> li = []
+>>> info(li)
+append     L.append(object) -- append object to end
+count      L.count(value) -> integer -- return number of occurrences of value
+extend     L.extend(list) -- extend list by appending list elements
+index      L.index(value) -> integer -- return index of first occurrence of value
+insert     L.insert(index, object) -- insert object before index
+pop        L.pop([index]) -> item -- remove and return item at index (default last)
+remove     L.remove(value) -- remove first occurrence of value
+reverse    L.reverse() -- reverse *IN PLACE*
+sort       L.sort([cmpfunc]) -- sort *IN PLACE*; if given, cmpfunc(x, y) -> -1, 0, 1
+\end{lstlisting}
+
+Avant de plonger dans le chapitre suivant, assurez vous que vous vous sentez à l’aise pour :
+
+\begin{itemize}
+    \item définir et appeler des fonctions avec des arguments optionnels et nommés ;
+    \item utiliser \emph{str} pour convertir une valeur quelconque en chaîne ;
+    \item utiliser \emph{getattr} pour obtenir des références à des fonctions et autres attributs dynamiquement ;
+    \item étendre la syntaxe des list comprehensions pour faire du filtrage de liste ;
+    \item identifier l’astuce \emph{and-or} et l’utiliser de manière sûre ;
+    \item définir des fonctions lambda ;
+    \item assigner des fonctions à des variables et appeler ces fonctions en référençant les variables. Je n’insisterais jamais assez : cette manière de penser est essentielle pour faire progresser votre compréhension de Python. Vous verrez des applications plus complexes de ce concept tout au long de ce livre.
+\end{itemize}
