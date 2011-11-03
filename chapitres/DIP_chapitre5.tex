@@ -1,0 +1,726 @@
+\chapter{Les objets et l'orienté objet}
+% chapitre 5
+
+Ce chapitre, comme la plupart de ceux qui le suivent, a trait à la programmation orientée objet en Python.
+
+\section{Plonger}
+
+Voici un programme Python complet et fonctionnel. Lisez les \emph{doc string} du module, des classes et des fonctions pour avoir un aperçu de ce que ce programme fait et de son fonctionnement. Comme d'habitude, ne vous inquiétez pas de ce que vous ne comprenez pas, la suite du chapitre est là pour vous  l'expliquer.
+
+\begin{example}[fileinfo.py]
+Si vous ne l’avez pas déjà fait, vous pouvez télécharger cet exemple ainsi que les autres exemples\footnote{\url{http://diveintopython.org/download/diveintopython-examples-5.4.zip}} du livre.
+
+\begin{lstlisting}
+"""Framework for getting filetype-specific metadata.
+
+Instantiate appropriate class with filename.  Returned object acts like a
+dictionary, with key-value pairs for each piece of metadata.
+    import fileinfo
+    info = fileinfo.MP3FileInfo("/music/ap/mahadeva.mp3")
+    print "\\n".join(["%s=%s" % (k, v) for k, v in info.items()])
+
+Or use listDirectory function to get info on all files in a directory.
+    for info in fileinfo.listDirectory("/music/ap/", [".mp3"]):
+        ...
+Framework can be extended by adding classes for particular file types, e.g.
+HTMLFileInfo, MPGFileInfo, DOCFileInfo.  Each class is completely responsible for
+parsing its files appropriately; see MP3FileInfo for example.
+"""
+
+import os
+import sys
+from UserDict import UserDict
+
+def stripnulls(data):
+    "strip whitespace and nulls"
+    return data.replace("\00", "").strip()
+
+class FileInfo(UserDict):
+    "store file metadata"
+    def __init__(self, filename=None):
+        UserDict.__init__(self)
+        self["name"] = filename
+
+class MP3FileInfo(FileInfo):
+    "store ID3v1.0 MP3 tags"
+    tagDataMap = {"title"   : (  3,  33, stripnulls),
+                  "artist"  : ( 33,  63, stripnulls),
+                  "album"   : ( 63,  93, stripnulls),
+                  "year"    : ( 93,  97, stripnulls),
+                  "comment" : ( 97, 126, stripnulls),
+                  "genre"   : (127, 128, ord)}
+
+    def __parse(self, filename):
+        "parse ID3v1.0 tags from MP3 file"
+        self.clear()
+        try:
+            fsock = open(filename, "rb", 0)
+            try:
+                fsock.seek(-128, 2)
+                tagdata = fsock.read(128)
+            finally:
+                fsock.close()
+            if tagdata[:3] == "TAG":
+                for tag, (start, end, parseFunc) in self.tagDataMap.items():
+                    self[tag] = parseFunc(tagdata[start:end])
+        except IOError:
+            pass
+
+    def __setitem__(self, key, item):
+        if key == "name" and item:
+            self.__parse(item)
+        FileInfo.__setitem__(self, key, item)
+
+def listDirectory(directory, fileExtList):
+    "get list of file info objects for files of particular extensions"
+    fileList = [os.path.normcase(f)
+                for f in os.listdir(directory)]
+    fileList = [os.path.join(directory, f)
+               for f in fileList
+                if os.path.splitext(f)[1] in fileExtList]
+    def getFileInfoClass(filename, module=sys.modules[FileInfo.__module__]):
+        "get file info class from filename extension"
+        subclass = "%sFileInfo" % os.path.splitext(filename)[1].upper()[1:]
+        return hasattr(module, subclass) and getattr(module, subclass) or FileInfo
+    return [getFileInfoClass(f)(f) for f in fileList]
+
+if __name__ == "__main__":
+    for info in listDirectory("/music/_singles/", [".mp3"]): (1)
+        print "\n".join(["%s=%s" % (k, v) for k, v in info.items()])
+        print
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{La sortie de ce programme dépend des fichiers qui se trouvent sur votre disque dur. Pour avoir une sortie pertinente, vous devrez changer le chemin pour qu'il pointe vers un répertoire de fichiers MP3 sur votre machine. Voici la sortie que j'ai obtenue sur ma machine. Votre sortie sera différente, sauf si, par une surprenante coïncidence, vous partagez exactement mes goûts musicaux}
+\end{enumerate}
+
+\begin{verbatim}
+album=
+artist=Ghost in the Machine
+title=A Time Long Forgotten (Concept
+genre=31
+name=/music/_singles/a_time_long_forgotten_con.mp3
+year=1999
+comment=http://mp3.com/ghostmachine
+
+album=Rave Mix
+artist=***DJ MARY-JANE***
+title=HELLRAISER****Trance from Hell
+genre=31
+name=/music/_singles/hellraiser.mp3
+year=2000
+comment=http://mp3.com/DJMARYJANE
+
+album=Rave Mix
+artist=***DJ MARY-JANE***
+title=KAIRO****THE BEST GOA
+genre=31
+name=/music/_singles/kairo.mp3
+year=2000
+comment=http://mp3.com/DJMARYJANE
+
+album=Journeys
+artist=Masters of Balance
+title=Long Way Home
+genre=31
+name=/music/_singles/long_way_home1.mp3
+year=2000
+comment=http://mp3.com/MastersofBalan
+
+album=
+artist=The Cynic Project
+title=Sidewinder
+genre=18
+name=/music/_singles/sidewinder.mp3
+year=2000
+comment=http://mp3.com/cynicproject
+
+album=Digitosis@128k
+artist=VXpanded
+title=Spinning
+genre=255
+name=/music/_singles/spinning.mp3
+year=2000
+comment=http://mp3.com/artists/95/vxp
+\end{verbatim}
+
+\section{Importation de modules avec \emph{from module import}}
+% Il faut faire des références (\ref \cite) pas "à la section 2.4"
+Python fournit deux manières d'importer les modules. Les deux sont utiles et vous devez savoir quand les utiliser. Vous avez déjà vu la première, \emph{import module}, à la Section 2.4, «~Tout est objet~». La deuxième manière accomplit la même action avec des différences subtiles, mais importantes dans son fonctionnement.
+
+\medskip
+\noindent Voici la syntaxe de base de \emph{from module import} :
+\begin{lstlisting}
+from UserDict import UserDict
+\end{lstlisting}
+
+Cela ressemble à la syntaxe import module que vous connaissez, mais avec une différence importante : les attributs et et les méthodes du module importé types sont importés directement dans l'espace de noms local, ils sont donc disponibles directement sans devoir les qualifier avec le nom du module. Vous pouvez importer des éléments précis ou utiliser \emph{from module import *} pour tout importer.
+
+\note{Python vs. Perl : from module import}{
+\emph{from module import *} en Python est comme \emph{use module} in Perl. \emph{import module} en Python est comme \emph{require module} en Perl.}
+
+\note{Python vs. Java : from module import}{
+\emph{from module import *} en Python est comme \emph{import module.*} en Java. \emph{import module} en Python est comme \emph{import module} en Java.}
+
+\begin{example}[import module vs. from module import]
+\begin{lstlisting}
+>>> import types
+>>> types.FunctionType             (1)
+<type 'function'>
+>>> FunctionType                   (2)
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+NameError: There is no variable named 'FunctionType'
+>>> from types import FunctionType (3)
+>>> FunctionType                   (4)
+<type 'function'>
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Le module \emph{types} ne contient aucune méthode, seulement des attributs pour chaque type d'objet Python. Notez que l'attribut \emph{FunctionType} doit être qualifié avec le nom de module, types.}
+\item{FunctionType lui-même n'a pas été défini dans cet espace de noms, il n'existe que dans le contexte de types.}
+\item{Cette syntaxe permet l'importation de l'attribut \emph{FunctionType} du module \emph{types} directement dans l'espace de noms local.}
+\item{Maintenant \emph{FunctionType} peut être référé directement, sans mentionner types.}
+\end{enumerate}
+
+\medskip
+Quand faut-il utiliser \emph{from module import} ?
+\begin{itemize}
+\item Quand vous devez accéder fréquemment aux attributs et méthodes et que vous ne voulez pas taper le nom de module sans arrêt, utilisez \emph{from module import}.
+\item Quand vous voulez n'importer que certains attributs et méthodes, utilisez \emph{from module import}.
+\item Quand le module contient des attributs ou des fonctions ayant des noms déjà utilisés dans votre module, vous devez utiliser \emph{import module} pour éviter les conflits de nom.
+\end{itemize}
+
+En dehors de ces cas, c'est une question de style et vous verrez du code Python écrit des deux manières.
+
+\attention{Attention}
+{Utilisez \emph{from module import *} avec modération, il rend plus difficile de déterminer l'origine d'une fonction ou d'un attribut, ce qui rend le débogage et la refactorisation plus difficiles.}
+
+\paragraph{Pour en savoir plus sur l'importation de module}
+\begin{itemize}
+\item eff-bot \footnote{\url{http://www.effbot.org/guides/}} a d'autres choses à ajouter à propos de import module et from module import \footnote{\url{http://www.effbot.org/guides/import-confusion.htm}}.
+\item Le Python Tutorial (http://www.python.org/doc/current/tut/tut.html) traite de techniques d'import avancées, y compris from module import \footnote{\url{http://www.python.org/doc/current/tut/node8.html\#SECTION008410000000000000000}}.
+\end{itemize}
+
+\section{Définition de classes}
+
+Python est entièrement orienté objet : vous pouvez définir vos propres classes, hériter de vos classes ou des classes prédéfinies et instancier les classes que vous avez définies.
+
+Définir une classe en Python est simple, comme pour les fonctions, il n'y a pas de définition séparée d'interface. Vous définissez simplement la classe et  commencez à coder. Une classe Python commence par le mot réservé class suivi du nom de la classe. Techniquement c'est tout ce qui est requis, une classe n'hérite pas obligatoirement d'une autre.
+
+\begin{example}[La classe Python la plus simple]
+\begin{lstlisting}
+class Loaf: (1)
+    pass    (2) (3)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Le nom de cette classe est Loaf et elle n'hérite d'aucune autre classe. Chaque mot d'un nom de classe prend habituellement une majuscule, «~DeCetteManiere~», mais c'est une simple convention et pas une nécessité. }
+\item{Cette classe ne définit aucune méthode ni attribut, mais pour respecter la syntaxe, il est nécessaire d'avoir quelque chose dans la définition, nous utilisons donc \emph{pass}. C'est un mot réservé de Python qui signifie simplement «~circulez, il n'y a rien à voir~». C'est une instruction qui ne fait rien et c'est un bon marqueur lorsque vous écrivez un squelette de fonction ou de classe.}
+\item{Vous l'aurez sans doute deviné, tout est indenté dans une classe, comme le code d'une fonction, d'une instruction if, d'une boucle for etc. La première ligne non indentée ne fait plus partie de la classe.}
+\end{enumerate}
+
+\note{Python vs. Java : pass}{
+L'instruction \emph{pass} de Python est comme une paire d'accolades vide (\emph{\{\}}) en Java ou C.}
+
+Bien sûr, dans des cas réels la plupart des classes hériteront d'autres classes et elles définiront leurs propres classes, méthodes et attributs. Mais comme vous l'avez vu, il n'y a rien qu'une classe doit absolument avoir en dehors d'un nom. En particulier, les programmeurs C++ s'étonneront sans doute que les classes Python n'aient pas de constructeurs et de destructeurs explicites. Les classes Python ont quelque chose de semblable à un constructeur : la méthode \emph{\_\_init\_\_}.
+
+\begin{example}[Définition de la classe FileInfo]
+\begin{lstlisting}
+from UserDict import UserDict
+
+class FileInfo(UserDict): (1)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{En Python, l'ancêtre d'une classe est simplement indiqué entre parenthèses immédiatement après le nom de la classe. La classe \emph{FileInfo} est hérite donc de la classe  \emph{UserDict} (qui a été importée du module \emph{UserDict}). \emph{UserDict} est une classe qui se comporte comme un dictionnaire, vous permettant pratiquement de dériver le type de données dictionnaire et d'y ajouter votre propre comportement (il y a des classes semblables \emph{UserList} et \emph{UserString} qui vous permettent de dériver les listes et les chaînes). Il y a un peu de magie noire derrière tout cela, nous la démystifierons plus loin dans ce chapitre lorsque nous explorerons la classe \emph{UserDict} plus en détail.}
+\end{enumerate}
+
+\note{Python vs. Java : ancêtres}{
+En Python, l'ancêtre d'une classe est simplement indiqué entre parenthèses immédiatement après le nom de la classe. Il n'y a pas de mot clé spécifique comme \emph{extends} en Java.}
+
+Python supporte l'héritage multiple. Entre les parenthèses qui suivent le nom de classe, vous pouvez indiquer autant de classes ancêtres que vous le souhaitez, séparées par des virgules.
+
+\subsection{Initialisation et écriture de classes}
+
+Cet exemple montre l'initialisation de la classe FileInfo avec la méthode \emph{\_\_init\_\_}.
+
+\begin{example}[Initialisation de la classe FileInfo]
+\begin{lstlisting}
+class FileInfo(UserDict):
+    "store file metadata"              (1)
+    def __init__(self, filename=None): (2) (3) (4)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Les classes peuvent aussi (et le devraient) avoir une doc string, comme les modules et les fonctions.}
+\item{\emph{\_\_init\_\_} est appelé immédiatement après qu'une instance de la classe est créée. Il serait tentant mais incorrect de l'appeler le constructeur de la classe. Tentant, parceque ça ressemble à un constructeur (par convention,  \emph{\_\_init\_\_} est la première méthode définie de la classe), ça se comporte comme un constructeur (c'est le premier morceau de code exécuté dans une nouvelle instance de la classe) et que ça sonne pareil («~init~» fait penser à quelque chose comme un constructeur). Incorrect, parce qu'au moment ou \emph{\_\_init\_\_} est appelé, l'objet à déjà été créé et qu vous avez déjà une référence valide à la nouvelle instance de la classe. Mais \emph{\_\_init\_\_} est ce qui se rapproche le plus d'un constructeur en Python et remplit en gros le même rôle.}
+\item{Le premier argument de chaque méthode de classe, y compris \emph{\_\_init\_\_}, est toujours une référence à l'instance actuelle de la classe. Par convention, cet argument est toujours nommé self. Dans la méthode \emph{\_\_init\_\_}, self fait référence à l'objet nouvellement créé, dans les autres méthodes de classe, il fait référence à l'instance dont la méthode a été appelée. Bien que vous deviez spécifier self explicitement lorsque vous définissez la méthode, vous ne devez pas le spécifier lorsque vous appelez la méthode, Python l'ajoutera pour vous automatiquement.}
+\item{Une méthode \emph{\_\_init\_\_} peut prendre n'importe quel nombre d'arguments et tout comme pour les fonctions, les arguments peuvent être définis avec des valeurs par défaut, ce qui les rend optionnels lors de l'appel. Ici \emph{filename} a une valeur par défaut de None, la valeur nulle de Python.}
+\end{enumerate}
+
+\note{Python vs. Java : self}{
+Par convention, le premier argument d'une méthode de classe (la référence à l'instance en cours) est appelé \emph{self}. Cet argument remplit le rôle du mot réservé \emph{this} en C++ ou Java, mais \emph{self} n'est pas un mot réservé de Python, seulement une convention de nommage. Cependant, veuillez ne pas l'appeler autrement, c'est une convention très importante.}
+
+\begin{example}[Ecriture de la classe FileInfo]
+\begin{lstlisting}
+class FileInfo(UserDict):
+    "store file metadata"
+    def __init__(self, filename=None):
+        UserDict.__init__(self)        (1)
+        self["name"] = filename        (2)
+                                               (3)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Certain langage pseudo-orientés objet comme Powerbuilder ont un concept «~d'extension~» des constructeurs et autres évènements, dans lequel la méthode de l'ancêtre est appelée automatiquement avant que la méthode du descendant soit exécutée. Python n'a pas ce comportement, vous devez appeler la méthode appropriée de l'ancêtre explicitement.}
+\item{Je vous ai dit que cette classe se comportait comme un dictionnaire, en voici le premier signe. Nous assignons l'argument \emph{filename} comme valeur de la clé name de cet objet.}
+\item{Notez que la méthode \emph{\_\_init\_\_} ne retourne jamais de valeur.}
+\end{enumerate}
+
+\subsection{Quand utiliser self et \emph{\_\_init\_\_}}
+
+Lorsque vous définissez vos méthodes de classe, vous devez indiquer explicitement \emph{self} comme premier argument de chaque méthode, y compris \emph{\_\_init\_\_}. Quand vous appelez une méthode d'une classe ancêtre depuis votre classe, vous devez inclure l'argument self. Mais quand vous appelez votre méthode de classe de l'extérieur, vous ne spécifiez rien pour l'argument self, vous l'omettez complètement et Python ajoute automatiquement la référence d'instance. Je me rends bien compte qu'on s'y perd au début, ce n'est pas réellement incohérent même si cela peut sembler l'être car cela est basé sur une distinction (entre méthode liée et non liée) que vous ne connaissez pas pour l'instant.
+
+Ouf. Je sais bien que ça fait beaucoup à absorber, mais vous ne tarderez pas à comprendre tout ça. Toutes les classes Python fonctionnent de la même manière, 
+donc quand vous en avez appris une, vous les connaissez toutes. Mais même si vous oubliez tout le reste souvenez vous de ça, car ça vous jouera des tours :
+
+\note{Méthodes \_\_init\_\_}{
+Les méthodes \_\_init\_\_ sont optionnelles, mais quand vous en définissez une, vous devez vous rappeler d'appeler explicitement la méthode \emph{\_\_init\_\_} de l'ancêtre de la classe. C'est une règle plus générale : quand un descendant veut étendre le comportement d'un ancêtre, la méthode du descendant doit appeler la méthode de l'ancêtre explicitement au moment approprié, avec les arguments appropriés.}
+
+
+\paragraph{Pour en savoir plus sur les classes Python}
+\begin{itemize}
+  \item Learning to Program \footnote{\url{http://www.freenetpages.co.uk/hp/alan.gauld/}} a une introduction en douceur aux classes \footnote{\url{http://www.freenetpages.co.uk/hp/alan.gauld/tutclass.htm}}.
+  \item How to Think Like a Computer Scientist \footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/}} montre comment utiliser des classes pour modéliser des types composés \footnote{\url{http://www.ibiblio.org/obp/thinkCSpy/chap12.htm}}.
+  \item Le Python Tutorial \footnote{\url{http://www.python.org/doc/current/tut/tut.html}} a un aperçu en profondeur des classes, des espaces de noms et de l'héritage \footnote{\url{http://www.python.org/doc/current/tut/node11.html}}.
+  \item La Python Knowledge Base (http://www.faqts.com/knowledge-base/index.phtml/fid/199/) répond à des questions courantes à propos des classes \footnote{\url{http://www.faqts.com/knowledge-base/index.phtml/fid/242}}.
+\end{itemize}
+
+\section{Instantiation de classes}
+
+L'instanciation de classes en Python est simple et directe. Pour instancier une classe, appelez simplement la classe comme si elle était une fonction, en lui passant les arguments que la méthode \emph{\_\_init\_\_} définit. La valeur de retour sera l'objet nouvellement créé.
+
+\begin{example}[Création d'une instance de FileInfo]
+\begin{lstlisting}
+>>> import fileinfo
+>>> f = fileinfo.FileInfo("/music/_singles/kairo.mp3") (1)
+>>> f.__class__                                        (2)
+<class fileinfo.FileInfo at 010EC204>
+>>> f.__doc__                                          (3)
+'store file metadata'
+>>> f                                                       (4)
+{'name': '/music/_singles/kairo.mp3'}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Nous créons une instance de la classe \emph{FileInfo} (définie dans le module \emph{fileinfo}) et assignons l'instance nouvellement créée à la variable f. Nous passons un paramètre, \emph{/music/\_singles/kairo.mp3}, qui sera l'argument \emph{filename} de la méthode \emph{\_\_init\_\_} de FileInfo.}
+\item{Chaque instance de classe à un attribut prédéfini, \emph{\_\_class\_\_}, qui est la classe de l'objet (notez que la représentation de cet attribut comprend l'adresse physique de l'instance sur ma machine, votre sortie sera différente). Les programmeurs Java sont sans doute familiers de la classe \emph{Class}, qui contient des méthodes comme \emph{getName} et \emph{getSuperclass} permettant d'obtenir les métadonnées d'un objet. En Python, ce type de métadonnées est accessible directement par le biais de l'objet lui-même à travers des attributs comme \emph{\_\_class\_\_}, \emph{\_\_name\_\_} et \emph{\_\_bases\_\_}.}
+\item{Vous pouvez accéder à la doc \emph{string} de l'instance comme pour une fonction ou un module. Toutes les instances d'une classe partagent la même doc string.}
+\item{Rappelez vous quand la méthode \emph{\_\_init\_\_} a assigné son argument \emph{filename} à \emph{self["name"]}. Voici le résultat. Les arguments que nous passons lorsque nous créons une instance de classe sont envoyés directement à la méthode \emph{\_\_init\_\_} (en même temps que la référence à l'objet, \emph{self}, que Python ajoute automatiquement).}
+\end{enumerate}
+
+\note{Python vs. Java : instantiation de classes}{
+En Python, vous appelez simplement une classe comme si c'était une fonction pour créer une nouvelle instance de la classe. Il n'y a pas d'opérateur \emph{new} explicite comme pour C++ ou Java.}
+
+\subsection{Ramasse-miettes}
+
+Si créer des instances est simple, les détruire est encore plus simple. En général, il n'y a pas besoin de libérer explicitement les instances, elles sont libérées automatiquement lorsque les variables auxquelles elles sont assignées sont hors de portée. Les fuites mémoire sont rares en Python.
+
+\begin{example}[Tentative d'implémentation d'une fuite mémoire]
+\begin{lstlisting}
+>>> def leakmem():
+...     f = fileinfo.FileInfo('/music/_singles/kairo.mp3') (1)
+...
+>>> for i in range(100):
+...     leakmem()                                          (2)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{A chaque fois que la fonction \emph{leakmem} est appelée, nous créons une instance de FileInfo et l'assignons à la variable \emph{f}, qui est une variable locale à la fonction. La fonction s'achève sans jamais libérer \emph{f}, vous pourriez donc vous attendre à une fuite mémoire, mais vous auriez tort. Lorsque la fonction se termine, la variable locale \emph{f} est hors de portée. A ce moment, il n'y a plus de référence à l'instance nouvellement créée de \emph{FileInfo} (puisque nous ne l'avons jamais assignée à autre chose qu'à f), Python détruit alors l'instance pour nous.}
+\item{Peu importe le nombre de fois que nous appelons la fonction \emph{leakmem}, elle ne provoquera jamais de fuite mémoire puisque Python va détruire à chaque fois la nouvelle instance de la classe FileInfo avant le retour de leakmem.}
+\end{enumerate}
+
+Le terme technique pour cette forme de ramasse-miettes est «~comptage de référence~». Python maintient une liste des références à chaque instance créée. Dans l'exemple ci-dessus, il n'y avait qu'une référence à l'instance de \emph{FileInfo} : la variable locale \emph{f}. Quand la fonction se termine, la variable \emph{f} sort de la portée, le compteur de référence descend alors à 0 et Python détruit l'instance automatiquement.
+
+Dans des versions précédentes de Python, il y avait des situations où le comptage de référence échouait et Python ne pouvait pas nettoyer derrière vous. Si vous créiez deux instances qui se référençaient mutuellement (par exemple une liste doublement chaînée où chaque noeud a un pointeur vers le noeud prochain et le précédent dans la liste), aucune des deux instances n'était jamais détruite car Python pensait (correctement) qu'il y avait toujours une référence à chaque instance. Python 2.0 a une forme additionnelle de ramasse-miettes appelée «~\emph{mark-and-sweep}~» qui est assez intelligente pour remarquer ce blocage et nettoyer correctement les références circulaires.
+
+En tant qu'ancien étudiant en Philosophie, cela me dérange de penser que les choses disparaissent quand personne ne les regarde, mais c'est exactement ce qui se passe en Python. En général, vous pouvez simplement ignorer la gestion mémoire et laisser Python nettoyer derrière vous.
+
+\paragraph{Pour en savoir plus sur le ramasse-miettes}
+\begin{itemize}
+  \item La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} résume les attributs prédéfinis comme \_\_class\_\_  footnote{\url{http://www.python.org/doc/current/lib/specialattrs.html}}.
+  \item La Python Library Reference\footnote{\url{http://www.python.org/doc/current/lib/}} documente le module \emph{gc} module \footnote{\url{http://www.python.org/doc/current/lib/module-gc.html}}, qui vous donne un contrôle de bas niveau sur le ramasse-miettes de Python.
+\end{itemize}
+
+\section{UserDict : une classe enveloppe}
+
+Comme vous l'avez vu, \emph{FileInfo} est une classe qui se comporte comme un dictionnaire. Pour voir ça plus en profondeur, regardons la classe \emph{UserDict} dans le module \emph{UserDict}, qui est l'ancêtre de notre classe \emph{FileInfo}. Cela n'a rien de spécial, la classe est écrite en Python et stockée dans un fichier \emph{.py}, tout comme notre code. En fait, elle est stockée dans le répertoire lib de votre installation Python.
+
+\note{Astuce}{
+Dans l'IDE ActivePython sous Windows, vous pouvez ouvrir rapidement n'importe quel module dans votre chemin de bibliothèques avec \emph{File->Locate}… (Ctrl-L).}
+
+\begin{example}[Definition de la classe UserDict]
+\begin{lstlisting}
+class UserDict:                                     (1)
+    def __init__(self, dict=None):              (2)
+        self.data = {}                                 (3)
+        if dict is not None: self.update(dict) (4) (5)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{Notez que \emph{UserDict} est une classe de base, elle n'hérite d'aucune classe.}
+\item{Voici la méthode \emph{\_\_init\_\_} que nous avons redéfinie dans la classe \emph{FileInfo}. Notez que la liste d'arguments dans cette classe ancêtre est différente de celle du descendant. Cela ne pose pas de problème, chaque classe dérivée peut avoir sa propre liste d'arguments, tant qu'elle appelle la méthode de l'ancêtre avec les arguments corrects. Ici, la classe ancêtre a un moyen de définir des valeurs initiales (en passant un dictionnaire à l'argument \emph{dict}) ce que notre \emph{FileInfo} n'exploite pas.}
+\item{Python supporte les données attributs (appelés «~variables d'instance~» en Java et Powerbuilder, «~variables membres~» en C++), qui sont des données propres à une instance spécifique de la classe. Dans ce cas, chaque instance de \emph{UserDict} aura un attribut de données data. Pour référencer cet attribut depuis du code extérieur à la classe, vous devez le qualifier avec le nom de l'instance, instance.data, de la même manière que vous qualifiez une fonction avec son nom de module. Pour référencer un attribut de données depuis la classe, nous utilisons \emph{self} pour le qualifier. Par convention, toutes les données attributs sont initialisées à des valeurs raisonnables dans la méthode \emph{\_\_init\_\_}. Cependant, ce n'est pas obligatoire, puisque les données attributs, comme les variables locales viennent à existence lorsqu'on leur assigne une valeur pour la première fois.}
+\item{La méthode \emph{update} est un duplicateur de dictionnaire. Elle copie toutes les clés et valeurs d'un dictionnaire à l'autre. Cela n'efface pas le dictionnaire de destination s’il a déjà des clés, celles qui sont présentes dans le dictionnaire source seront récrites, mais les autres ne seront pas touchées. Considérez update comme une fonction de fusion, pas de copie.}
+\item{Voici une syntaxe que vous n'avez peut-être pas vue auparavant (je ne l'ai pas employé dans les exemples de ce livre). C'est une instruction \emph{if}, mais au lieu d'avoir un bloc indenté commençant à la ligne suivante, il y a juste une instruction unique sur la même ligne après les deux points. C'est une syntaxe tout à fait légale, c'est juste un raccourci lorsque vous n'avez qu'une instruction dans un bloc (comme donner une instruction unique sans accolades en C++). Vous pouvez employer cette syntaxe ou vous pouvez avoir du code indenté sur les lignes suivantes, mais vous ne pouvez pas mélanger les deux dans le même bloc.}
+\end{enumerate}
+
+\note{Python vs. Java : surcharge de fonction}{
+Java et Powerbuilder supportent la surcharge de fonction par liste d'arguments : une classe peut avoir différentes méthodes avec le même nom mais avec un nombre différent d'arguments ou des arguments de type différent. D'autres langages (notamment PL/SQL) supportent même la surcharge de fonction par nom d'argument : une classe peut avoir différentes méthodes avec le même nom et le même nombre d'arguments du même type mais avec des noms d'arguments différents. Python ne supporte ni l'une ni l'autre, il n'a tout simplement aucune forme de surcharge de fonction. Les méthodes sont définies uniquement par leur nom et il ne peut y avoir qu'une méthode par classe avec le même nom. Donc si une classe descendante a une méthode \emph{\_\_init\_\_}, elle redéfinit toujours la méthode \emph{\_\_init\_\_} de la classe ancêtre, même si la descendante la définit avec une liste d'arguments différente. Et la même règle s'applique pour toutes les autres méthodes.}
+
+\note{}{
+Guido, l'auteur originel de Python, explique la redéfinition de méthode de cette manière : «~Les classes dérivées peuvent redéfinir les méthodes de leurs classes de base. Puisque les méthodes n'ont pas de privilèges spéciaux lorsqu'elles appellent d'autres méthodes du même objet, une méthode d'une classe de base qui appelle une autre méthode définie dans cette même classe de base peut en fait se retrouver à appeler une méthode d'une classe dérivée qui la redéfini (pour les programmeurs C++ cela veut dire qu'en Python toutes les méthodes sont virtuelles)~». Si cela n'a pas de sens pour vous, vous pouvez ignorer la question.}
+
+\note{Attention}{
+Assignez toujours une valeur initiale à toutes les données attributs d'une instance dans la méthode \emph{\_\_init\_\_}. Cela vous épargnera des heures de débogage plus tard, à la poursuite d'exceptions \emph{AttributeError} pour cause de référence à des attributs non initialisés (et donc non existants).}
+
+\begin{example}[Méthodes ordinaires de UserDict]
+\begin{lstlisting}
+    def clear(self): self.data.clear()          (1)
+    def copy(self):                                  (2)
+        if self.__class__ is UserDict:         (3)
+            return UserDict(self.data)
+        import copy                                 (4)
+        return copy.copy(self)
+    def keys(self): return self.data.keys()     (5)
+    def items(self): return self.data.items()
+    def values(self): return self.data.values()
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{\emph{clear} est une méthode de classe ordinaire, elle est disponible publiquement et peut être appelée par n'importe qui. Notez que \emph{clear}, comme toutes les méthodes de classe, a pour premier argument \emph{self} (rappelez-vous que vous ne mentionnez pas \emph{self} lorsque vous appelez la méthode, Python l'ajoute pour  vous). Notez aussi la technique de base employée par cette classe enveloppe : utiliser un véritable dictionnaire (data) comme données attributs, définir toutes les méthodes d'un véritable dictionnaire et rediriger chaque méthode vers la méthode du véritable dictionnaire (au cas où vous l'auriez oublié, la méthode clear d'un dictionnaire supprime toutes ses clés et leurs valeurs associées).}
+\item{La méthode \emph{copy} d'un véritable dictionnaire retourne un nouveau dictionnaire qui est un double exact de l'original (avec les mêmes paires clé-valeur). Mais \emph{UserDict} ne peut pas simplement rediriger la méthode vers \emph{.data.copy}, car cette méthode retourne un véritable dictionnaire, alors  que nous voulons retourner une nouvelle instance qui soit de la même classe que self.}
+\item{Nous utilisons l'attribut \emph{\_\_class\_\_} pour voir si \emph{self} est un \emph{UserDict} et, dans ce cas, tout va bien puisque nous savons comment copier un \emph{UserDict} : il suffit de créer un nouveau \emph{UserDict} et de lui passer le dictionnaire véritable qu'est self.data.}
+\item{Si self.\_\_class\_\_ n'est pas un \emph{UserDict}, alors \emph{self} doit être une classe dérivée de \emph{UserDict} (par exemple \emph{FileInfo}), dans ce cas c'est plus compliqué. \emph{UserDict} ne sait pas comment faire une copie exacte d'un de ses descendants. Il pourrait y avoir, par exemple, d'autres données attributs définies dans la classe dérivée, ce qui nécessiterait de les copier tous. Heureusement Python est fourni avec un module qui remplit cette tâche, le module \emph{copy}. Je ne vais pas entrer ici dans les détails (bien que ce soit très intéressant et vaille la peine que vous y jetiez un coup d' il). Il suffit de dire que \emph{copy} peut copier un objet Python quelconque et que c'est comme cela que nous l'employons ici.}
+\item{Le reste des méthodes est sans difficulté, les appels sont redirigés vers les méthodes de \emph{self.data}.}
+\end{enumerate}
+
+
+\note{Note historique}{
+Dans les versions de Python antérieures à la 2.2, vous ne pouviez pas directement dériver les types de données prédéfinis comme les chaînes, les listes et les dictionnaires. Pour compenser cela, Python est fourni avec des classes enveloppes qui reproduisent le comportement de ces types de données prédéfinis : \emph{UserString}, \emph{UserList} et \emph{UserDict}. En utilisant un mélange de méthodes ordinaires et spéciales, la classe \emph{UserDict} fait une excellente imitation d'un dictionnaire, mais c'est juste une classe comme les autres, vous pouvez donc la dériver pour créer des classes personnalisées semblables à un dictionnaire comme \emph{FileInfo}. En Python 2.2 et suivant, vous pourriez récrire l'exemple de ce chapitre de manière à ce que \emph{FileInfo} hérite directement de \emph{dict} au lieu de \emph{UserDict}. Cependant, vous devriez quand même lire l'explication du fonctionnement de \emph{UserDict} au cas où vous auriez besoin d'implémenter ce genre d'objet enveloppe ou au cas où vous auriez à travailler avec une version de Python antérieure à la 2.2.}
+
+En Python il est possible de dériver une classe directement du type de données prédéfini \emph{dict}, comme dans l'exemple suivant. Il y a trois différence avec la version dérivée de \emph{UserDict}.
+
+\begin{example}[Dériver une classe directement du type prédéfini dict]
+\begin{lstlisting}
+class FileInfo(dict):                          (1)
+    "store file metadata"
+    def __init__(self, filename=None): (2)
+        self["name"] = filename
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item{La première différence est que nous n'avons pas besoin d'importer le module \emph{UserDict}, puisque dict est un type prédéfini et donc toujours disponible. La seconde est que nous dérivons notre classe de \emph{dict} directement et non de \emph{UserDict.UserDict}.}
+\item{La troisième différence est subtile mais importante. À cause de la manière dont \emph{UserDict} fonctionne en interne, nous devons appeler explicitement sa méthode \emph{\_\_init\_\_} pour l'initialiser correctement. \emph{dict} ne fonctionne pas de la même manière, ce n'est pas une enveloppe et il ne demande pas d'initialisation explicite.}
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur \emph{UserDict}}
+\begin{itemize}
+  \item La Python Library Reference \footnote{\url{http://www.python.org/doc/current/lib/}} documente le module UserDict \footnote{\url{http://www.python.org/doc/current/lib/module-UserDict.html}} et le module copy \footnote{\url{http://www.python.org/doc/current/lib/module-copy.html}}.
+\end{itemize}
+
+\section{Méthodes de classe spéciales}
+
+En plus des méthodes de classe ordinaires, il y a un certain nombre de méthodes spéciales que les classes Python peuvent définir. Au lieu d'être appelées  directement par votre code (comme les méthodes ordinaires) les méthodes spéciales sont appelées pour vous par Python dans des circonstances particulières ou quand une syntaxe spécifique est utilisée.
+
+Comme vous l'avez vu dans la section précédente, les méthodes ordinaires nous ont permis en grande partie d'envelopper un dictionnaire dans une classe. Mais les méthodes ordinaires seules ne suffisent pas parce qu'il y a beaucoup de choses que vous pouvez faire avec un dictionnaire en dehors d'appeler ses méthodes. Pour commencer, vous pouvez lire (\emph{get}) et écrire (\emph{set}) des éléments à l'aide d'une syntaxe qui ne fait pas explicitement appel à des méthodes. C'est là que les méthodes de classe spéciales interviennent : elles fournissent un moyen de faire correspondre la syntaxe n'appelant pas de méthodes à des appels de méthodes.
+
+\subsection{Lire et écrire des éléments}
+
+\begin{example}[La méthode spéciale \emph{\_\_getitem\_\_}]
+\begin{lstlisting}
+    def __getitem__(self, key): return self.data[key]
+
+>>> f = fileinfo.FileInfo("/music/_singles/kairo.mp3")
+>>> f
+{'name':'/music/_singles/kairo.mp3'}
+>>> f.__getitem__("name") (1)
+'/music/_singles/kairo.mp3'
+>>> f["name"]             (2)
+'/music/_singles/kairo.mp3'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+\item La méthode spéciale \emph{\_\_getitem\_\_} à l'air simple. Comme les méthodes ordinaires \emph{clear}, \emph{keys} et \emph{values}, elle ne fait que rediriger vers le dictionnaire pour obtenir sa valeur. Mais comment est-elle appelée ? Vous pouvez appeler \emph{\_\_getitem\_\_} directement, mais en pratique vous ne le ferez pas, je le fais ici seulement pour vous montrer comment ça marche. La bonne manière d'utiliser \emph{\_\_getitem\_\_} est d'obtenir de Python qu'il fasse l'appel pour vous.
+\item Cela à l'apparence exacte de la syntaxe que l'on utilise pour obtenir une valeur d'un dictionnaire et cela retourne bien la valeur que l'on attend. Mais il y a un chaînon manquant : en coulisse, Python convertit cette syntaxe en un appel de méthode \emph{f.\_\_getitem\_\_("name")}. C'est pourquoi \emph{\_\_getitem\_\_} est une méthode de classe spéciale, non seulement vous pouvez l'appeler vous-même, mais vous pouvez faire en sorte que Python l'appelle pour vous grâce à la syntaxe appropriée.
+\end{enumerate}
+
+\medskip
+Bien sûr, Python a une méthode spéciale \emph{\_\_setitem\_\_} pour accompagner \emph{\_\_getitem\_\_}, comme nous le montrons dans l'exemple suivant.
+
+\begin{example}[La méthode spéciale \emph{\_\_setitem\_\_}]
+\begin{lstlisting}
+    def __setitem__(self, key, item): self.data[key] = item
+
+>>> f
+{'name':'/music/_singles/kairo.mp3'}
+>>> f.__setitem__("genre", 31) (1)
+>>> f
+{'name':'/music/_singles/kairo.mp3', 'genre':31}
+>>> f["genre"] = 32            (2)
+>>> f
+{'name':'/music/_singles/kairo.mp3', 'genre':32}
+\end{lstlisting}
+\end{example}
+
+\begin{itemize}
+    \item Comme la méthode \emph{\_\_getitem\_\_}, \emph{\_\_setitem\_\_} redirige simplement l'appel au véritable dictionnaire self.data. Et comme pour \emph{\_\_getitem\_\_}, vous n'appelez pas directement cette méthode en général, Python appelle \emph{\_\_setitem\_\_} pour vous lorsque vous utilisez la bonne syntaxe.
+    \item Cela ressemble à la syntaxe habituelle d'utilisation d'un dictionnaire, mais en fait \emph{f} est une classe faisant de son mieux pour passer pour un dictionnaire et \emph{\_\_setitem\_\_} est un élément essentiel de cette apparence. Cette ligne de code appelle en fait \emph{f.\_\_setitem\_\_("genre", 32)} en coulisse.
+\end{itemize}
+
+\medskip
+\emph{\_\_setitem\_\_} est une méthode de classe spéciale, car elle est appelée pour vous, mais c'est quand même une méthode de classe. Nous pouvons la redéfinir dans une classe descendante tout aussi facilement qu'elle a été définie dans \emph{UserDict}. Cela nous permet de définir des classes qui se comportent en partie comme des dictionnaires, mais qui ont leur propre comportement dépassant le cadre d'un simple dictionnaire.
+
+Ce concept est à la base de tout le \emph{framework} que nous étudions dans ce chapitre. Chaque type de fichier peut avoir une classe de manipulation qui sait comment obtenir des métadonnées d'un type particulier de fichier. Une fois certains attributs (comme le nom et l'emplacement du fichier) connus, la classe de manipulation sait comment obtenir les autres attributs automatiquement. Cela se fait en redéfinissant la méthode \emph{\_\_setitem\_\_}, en cherchant des clés particulières et en ajoutant un traitement supplémentaire quand elles sont trouvées.
+
+Par exemple, \emph{MP3FileInfo} est un descendant de \emph{FileInfo}. Quand le nom (\emph{name}) d'un \emph{MP3FileInfo} est défini, cela ne change pas seulement la valeur de la clé \emph{name} (comme pour l'ancêtre \emph{FileInfo}), mais déclenche la recherche de balises MP3 et définit tout un ensemble de clés.
+
+\begin{example}[Redéfinition de \emph{\_\_setitem\_\_} dans MP3FileInfo]
+\begin{lstlisting}
+    def __setitem__(self, key, item):               (1)
+        if key == "name" and item:                   (2)
+            self.__parse(item)                            (3)
+        FileInfo.__setitem__(self, key, item)     (4)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item Notez que notre méthode \emph{\_\_setitem\_\_} est définie exactement comme la méthode héritée. C'est important, car Python appellera la méthode pour nous et qu'il attend un certain nombre d'arguments (techniquement parlant, les noms des arguments n'ont pas d'importance, seulement leur nombre).
+    \item Voici le point crucial de toute la classe MP3FileInfo : si nous assignons une valeur à la clé \emph{name}, alors nous voulons faire quelque chose en plus.
+    \item Le traitement supplémentaire que nous faisons pour les noms (\emph{name}) est encapsulé dans la méthode \emph{\_\_parse}. C'est une autre méthode de classe définie dans \emph{MP3FileInfo} et quand nous l'appelons nous la qualifions avec self. Un appel à \emph{\_\_parse} tout court chercherait une fonction ordinaire définie hors de la classe, ce qui n'est pas ce que nous voulons, appeler \emph{self.\_\_parse} cherchera une méthode définie dans la classe. Cela n'a rien de nouveau, c'est de la même manière que l'on fait référence aux données attributs.
+    \item Après avoir fait notre traitement supplémentaire, nous voulons appeler la méthode héritée. Rappelez-vous que Python ne le fait jamais pour vous, vous devez le faire manuellement. Notez que nous appelons l'ancêtre immédiat, \emph{FileInfo}, même si il n'a pas de méthode \emph{\_\_setitem\_\_}. Cela fonctionne parce que Python va remonter la hiérarchie d'héritage jusqu'à ce qu'il trouve une classe avec la méthode que nous appelons, cette ligne finira donc par trouver et appeler la méthode \emph{\_\_setitem\_\_} définie dans \emph{UserDict}.
+\end{enumerate}
+
+\medskip
+\note{}{
+Lorsque vous accédez à des données attributs dans une classe, vous devez qualifier le nom de l'attribut : \emph{self.attribute}. Lorsque vous appelez d'autres méthodes dans une classe, vous devez qualifier le nom de la méthode : \emph{self.method}.}
+
+\begin{example}[Setting an MP3FileInfo's name]
+\begin{lstlisting}
+>>> import fileinfo
+>>> mp3file = fileinfo.MP3FileInfo()                   (1)
+>>> mp3file
+{'name':None}
+>>> mp3file["name"] = "/music/_singles/kairo.mp3"      (2)
+>>> mp3file
+{'album': 'Rave Mix', 'artist': '***DJ MARY-JANE***', 'genre': 31,
+'title': 'KAIRO****THE BEST GOA', 'name': '/music/_singles/kairo.mp3',
+'year': '2000', 'comment': 'http://mp3.com/DJMARYJANE'}
+>>> mp3file["name"] = "/music/_singles/sidewinder.mp3" (3)
+>>> mp3file
+{'album': '', 'artist': 'The Cynic Project', 'genre': 18, 'title': 'Sidewinder',
+'name': '/music/_singles/sidewinder.mp3', 'year': '2000',
+'comment': 'http://mp3.com/cynicproject'}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item D'abord nous créons une instance de MP3FileInfo sans lui passer de nom de fichier (nous pouvons le faire parce que l'argument filename de la méthode \emph{\_\_init\_\_} est optionnel). Comme \emph{MP3FileInfo} n'a pas de méthode \emph{\_\_init\_\_} propre, Python remonte la hierarchie d'héritage et trouve la méthode \emph{\_\_init\_\_} de \emph{FileInfo}. Cette méthode \emph{\_\_init\_\_} appelle manuellement la méthode \emph{\_\_init\_\_} de UserDict puis définit la clé name à la valeur de filename, qui est None puisque nous n'avons passé aucun nom de fichier. Donc \emph{mp3file} est au début un dictionnaire avec une clé, name, dont la valeur est \emph{None}.
+    \item Maintenant les choses sérieuses commencent. Définir la clé name de \emph{mp3file} déclenche la méthode \emph{\_\_setitem\_\_} de \emph{MP3FileInfo} (pas \emph{UserDict}), qui remarque que nous définissons la clé name avec une valeur réelle et appelle \emph{self.\_\_parse}. Bien que nous n'ayons pas encore vu le contenu de la méthode \emph{\_\_parse}, vous pouvez voir à partir de la sortie qu'elle définit plusieurs autres clés : album, artist, genre, title, year et comment.
+    \item Modifier la clé name recommencera le même processus : Python appelle \emph{\_\_setitem\_\_}, qui appelle \emph{self.\_\_parse}, qui définit toutes les autres clés.
+\end{enumerate}
+
+\section{Méthodes spéciales avancées}
+
+Il y a d'autres méthodes spéciales que \emph{\_\_getitem\_\_} et \emph{\_\_setitem\_\_}. Certaines vous laissent émuler des fonctionnalité dont vous ignorez encore peut-être tout. Cet exemple montre certaines des autres méthodes spéciales de \emph{UserDict}.
+
+\begin{example}[D'autres méthodes spéciales dans UserDict]
+\begin{lstlisting}
+    def __repr__(self): return repr(self.data)         (1)
+    def __cmp__(self, dict):                               (2)
+        if isinstance(dict, UserDict):
+            return cmp(self.data, dict.data)
+        else:
+            return cmp(self.data, dict)
+    def __len__(self): return len(self.data)           (3)
+    def __delitem__(self, key): del self.data[key] (4)
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item \emph{\_\_repr\_\_} est une méthode spéciale qui est appelée lorsque vous appelez \emph{repr (instance)}. La fonction \emph{repr} est une fonction prédéfinie qui retourne une représentation en chaîne d'un objet. Elle fonctionne pour tout objet, pas seulement les instances de classes. En fait, vous êtes déjà familier de \emph{repr}, même si vous l'ignorez. Dans la fenêtre interactive, lorsque vous tapez juste un nom de variable et faites Entrée, Python utilise \emph{repr} pour afficher la valeur de la variable. Créez un dictionnaire \emph{d} avec des données, puis faites \emph{print repr(d)} pour le voir par vous même.
+    \item\emph{\_\_cmp\_\_} est appelé lorsque vous comparez des instances de classe. En général, vous pouvez comparer deux objets Python quels qu'ils soient, pas seulement des instances de classe, en utilisant \emph{==}. Il y a des règles qui définissent quand les types de données prédéfinis sont considérés égaux. Par exemple, les dictionnaires sont égaux quand ils ont les mêmes clés et valeurs, les chaînes sont égales quand elles ont la même longueur et contiennent la même séquence de caractères. Pour les instances de classe, vous pouvez définir la méthode \emph{\_\_cmp\_\_} et écrire la logique de comparaison vous-même et vous pouvez ensuite utiliser \emph{==} pour comparer des instances de votre classe, Python appellera votre méthode spéciale \emph{\_\_cmp\_\_} pour vous.
+    \item \emph{\_\_len\_\_} est appelé lorsque vous appelez \emph{len(instance)}. La fonction \emph{len} est une fonction prédéfinie qui retourne la longueur d'un objet. Elle fonctionne pour tout objet pour lequel il est envisageable de penser qu'il a une longueur. La \emph{len} d'une chaîne est son nombre de caractères, la \emph{len} d'un dictionnaire est son nombre de clés et la \emph{len} d'une liste ou \emph{tuple} est son nombre d'éléments. Pour les instances de classe, définissez la méthode \emph{\_\_len\_\_} et écrivez le calcul de longueur vous-même, puis appelez \emph{len (instance)} et Python appellera votre méthode spéciale \emph{\_\_len\_\_} pour vous.
+    \item \emph{\_\_delitem\_\_} est appelé lorsque vous appelez \emph{del instance[key]}, ce qui, vous vous en rappelez peut-être, est le moyen de supprimer des éléments individuels d'un dictionnaire. Quand vous utilisez \emph{del} sur une instance de classe, Python appelle la méthode spéciale \emph{\_\_delitem\_\_} pour vous.
+\end{enumerate}
+
+
+\note{Python vs. Java : égalité et identité}{
+En Java, vous déterminez si deux variables de chaînes référencent la même zone mémoire à l'aide de \emph{str1 == str2}. On appelle cela identité des objets et la syntaxe Python en est \emph{str1 is str2}. Pour comparer des valeurs de chaînes en Java, vous utiliseriez \emph{str1.equals(str2)}, en Python, vous utiliseriez \emph{str1 == str2}. Les programmeurs Java qui ont appris que le monde était rendu meilleur par le fait que \emph{==} en Java fasse une comparaison par identité plutôt que par valeur peuvent avoir des difficultés à s'adapter au fait que Python est dépourvu d'un tel piège.}
+
+Vous trouvez peut-être que ça fait beaucoup de travail pour faire avec une classe ce qu'on peut faire avec un type de données prédéfini. Et c'est vrai que tout serait   plus simple (et la classe UserDict serait inutile) si on pouvait hériter d'un type de données prédéfini comme un dictionnaire. Mais même si vous pouviez le faire, les méthodes spéciales seraient toujours utiles, car elles peuvent être utilisées dans n'importe quelle classe, pas seulement dans une classe enveloppe comme UserDict.
+
+Les méthodes spéciales permettent à toute classe de stocker des paires clé-valeur comme un dictionnaire, simplement en définissant la méthode \emph{\_\_setitem\_\_}. Toute classe peut se comporter comme une séquence, simplement en définissant la méthode \emph{\_\_getitem\_\_}. Toute classe qui définit la méthode \emph{\_\_cmp\_\_} peut être comparée avec \emph{==}. Et si votre classe représente quelque chose qui a une longeur, ne créez pas une méthode GetLength, définissez la méthode \emph{\_\_len\_\_} et utilisez len(instance).
+
+\note{}{
+Alors que les autres langages orientés objet ne vous laissent définir que le modèle physique d'un objet (« cet objet a une méthode GetLength »), les méthodes spéciales de Python comme \emph{\_\_len\_\_} vous permettent de définir le modèle logique d'un objet («~cet objet a une longueur~»).}
+
+Il y a de nombreuses autres méthodes spéciales. Un ensemble de ces méthodes permet aux classes de se comporter comme des nombres, permettant l'addition, la
+soustraction et autres opérations arithmétiques sur des instances de classe (l'exemple type en est une classe représentant les nombres complexes, nombres ayant  à la fois un composant réel et imaginaire). La méthode \emph{\_\_call\_\_} permet à une classe de se comporter comme une fonction, ce qui permet d'appeler une instance de classe directement. Il y a aussi d'autres méthodes spéciales permettant aux classes d'avoir des données attributs en lecture seule ou en écriture seule, nous en parlerons dans des chapitres à venir.
+
+\paragraph{Pour en savoir plus sur les méthodes de classe spéciales}
+\begin{itemize}
+  \item La Python Reference Manual  \footnote{\url{http://www.python.org/doc/current/ref/}} documente toutes les méthodes spéciales de classe  \footnote{\url{http://www.python.org/doc/current/ref/specialnames.html}}.
+\end{itemize}
+
+
+\section{Attributs de classe}
+
+Vous connaissez déjà les données attributs, qui sont des variables appartenant à une instance particulière d'une classe. Python permet aussi les attributs de classe, qui sont des variables appartenant à la classe elle-même.
+
+\begin{example}[ Présentation des attributs de classe]
+\begin{lstlisting}
+class MP3FileInfo(FileInfo):
+    "store ID3v1.0 MP3 tags"
+    tagDataMap = {"title"   : (  3,  33, stripnulls),
+                  "artist"  : ( 33,  63, stripnulls),
+                  "album"   : ( 63,  93, stripnulls),
+                  "year"    : ( 93,  97, stripnulls),
+                  "comment" : ( 97, 126, stripnulls),
+                  "genre"   : (127, 128, ord)}
+
+>>> import fileinfo
+>>> fileinfo.MP3FileInfo            (1)
+<class fileinfo.MP3FileInfo at 01257FDC>
+>>> fileinfo.MP3FileInfo.tagDataMap (2)
+{'title': (3, 33, <function stripnulls at 0260C8D4>),
+'genre': (127, 128, <built-in function ord>),
+'artist': (33, 63, <function stripnulls at 0260C8D4>),
+'year': (93, 97, <function stripnulls at 0260C8D4>),
+'comment': (97, 126, <function stripnulls at 0260C8D4>),
+'album': (63, 93, <function stripnulls at 0260C8D4>)}
+>>> m = fileinfo.MP3FileInfo()      (3)
+>>> m.tagDataMap
+{'title': (3, 33, <function stripnulls at 0260C8D4>),
+'genre': (127, 128, <built-in function ord>),
+'artist': (33, 63, <function stripnulls at 0260C8D4>),
+'year': (93, 97, <function stripnulls at 0260C8D4>),
+'comment': (97, 126, <function stripnulls at 0260C8D4>),
+'album': (63, 93, <function stripnulls at 0260C8D4>)}
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item MP3FileInfo est la classe elle-même, pas une instance particulière de cette classe.
+    \item tagDataMap est un attribut de classe : littéralement, un attribut de la classe. Il est disponible avant qu'aucune instance de la classe n'ait été créée.
+    \item Les attributs de classe sont disponibles à la fois par référence directe à la classe et par référence à une instance quelconque de la classe.
+\end{enumerate}
+
+\note{Python vs. Java définition des attributs}{
+En Java, les variables statiques (appelées attributs de classe en Python) aussi bien que les variables d'instance (appelées données attributs en Python) sont définies immédiatement après la définition de la classe (avec le mot-clé \emph{static} pour les premières). En Python, seuls les attributs de classe peuvent être définis à cet endroit, les données attributs sont définies dans la méthode \_\_init\_\_.
+
+Les attributs de classe peuvent être utilisés comme des constantes au niveau de la classe (ce qui est la manière dont nous les utilisons dans MP3FileInfo), mais ils ne sont pas vraiment des constantes. Vous pouvez également les modifier.}
+
+\note{}{
+Il n'y a pas de constantes en Python. Tout est modifiable en faisant un effort. C'est en accord avec un des principes essentiels de Python : un mauvais comportement doit être découragé mais pas interdit. Si vous voulez vraiment changer la valeur de None, vous pouvez le faire, mais ne venez pas vous plaindre que votre code est impossible à déboguer.}
+
+\begin{example}[Modification des attributs de classe]
+\begin{lstlisting}
+>>> class counter:
+...     count = 0                     (1)
+...     def __init__(self):
+...         self.__class__.count += 1 (2)
+...
+>>> counter
+<class __main__.counter at 010EAECC>
+>>> counter.count                     (3)
+0
+>>> c = counter()
+>>> c.count                           (4)
+1
+>>> counter.count
+1
+>>> d = counter()                     (5)
+>>> d.count
+2
+>>> c.count
+2
+>>> counter.count
+2
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item count est un attribut de la classe counter.
+    \item  \emph{\_\_class\_\_} est un attribut prédéfini de toute instance de classe (de toute classe). C'est une référence à la classe dont self est une instance (dans ce cas, la classe \emph{counter}).
+    \item  Comme \emph{count} est un attribut de classe, il est disponible par référence directe à la classe, avant que nous ayions créé une instance de la classe.
+    \item  Créer une instance de la classe appelle la méthode \emph{\_\_init\_\_}, qui incrémente l'attribut de classe \emph{count} de 1. Cela affecte la classe elle-même, pas seulement l'instance nouvellement créée.
+    \item  Créer une seconde instance incrémente à nouveau l'attribut de classe \emph{count}. Vous constatez que l'attribut de classe est partagé par la classe et toutes ses instances.
+\end{enumerate}
+
+\section{Fonctions privées}
+
+Comme la plupart des langages, Python possède le concept d'éléments privés :
+\begin{itemize}
+  \item des fonctions privées, qui ne peuvent être appelées de l'extérieur de leur module ;
+  \item des méthodes de classe privées, qui ne peuvent être appelées de l'extérieur de leur classe ;
+  \item des attributs privés, qui ne peuvent être accédé de l'extérieur de leur classe.
+\end{itemize}
+
+Contrairement à la plupart des langages, le caractère privé ou public d'une fonction, d'une méthode ou d'un attribut est déterminé en Python entièrement par son nom.
+
+Si le nom d'une fonction, d'une méthode de classe ou d'un attribut commence par (mais ne se termine pas par) deux caractères de soulignement il s'agit d'un élément privé, tout le reste est public. Python ne possède pas de concept de méthode protégée (accessible seulement à la même classe ou a ses descendants). Les  méthodes d'une classe sont ou privées (accessibles seulement à la même classe) ou publiques (accessibles à tout le monde).
+
+\emph{MP3FileInfo} a deux méthodes : \emph{\_\_parse} et \emph{\_\_setitem\_\_}. Comme nous en avons déjà discuté, \emph{\_\_setitem\_\_} est une méthode spéciale, vous l'appelez normalement indirectement en utilisant la syntaxe de dictionnaire sur une instance de classe, mais elle est publique et vous pouvez l'appeler directement (même d'en dehors du module \emph{fileinfo}) si vous avez une bonne raison de le faire. Par contre \emph{\_\_parse} est privée, car elle a deux caractères de soulignement au début de son nom.
+
+\note{Convention pour les noms de méthodes}{
+En Python, toutes les méthodes spéciales (comme \emph{\_\_setitem\_\_}) et les attributs prédéfinis (comme \emph{\_\_doc\_\_}) suivent une convention standard : il commencent et se terminent par deux caractères de soulignement. Ne nommez pas vos propres méthodes et attributs de cette manière, cela n'apporterait que de la confusion pour vous et les autres.}
+
+\begin{example}[Tentative d'appel d'une méthode privée]
+\begin{lstlisting}
+>>> import fileinfo
+        >>> m = fileinfo.MP3FileInfo()
+        >>> m.__parse("/music/_singles/kairo.mp3") (1)
+        Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+        AttributeError: 'MP3FileInfo' instance has no attribute '__parse'
+\end{lstlisting}
+\end{example}
+
+\begin{enumerate}
+    \item Si vous essayez d'appeler une méthode privée, Python lèvera une exception un peu trompeuse disant que la méthode n'existe pas. Bien sûr elle existe, mais elle est privée, donc elle n'est pas accessible d'en dehors de la classe. A proprement parler, les méthodes privées sont accessibles d'en dehors de leur classe, mais pas facilement accessibles. Rien n'est vraiment privé en Python, en interne les noms des méthodes et attributs privés sont camouflés à la volée pour les rendre inaccessibles par leur nom d'origine. Vous pouvez accéder à la méthode \emph{\_\_parse} de la classe \emph{MP3FileInfo} par le nom \emph{\_MP3FileInfo\_\_parse}. Vous êtes prié de trouver ça intéressant mais de promettre de ne jamais, jamais l'utiliser dans votre code. Les méthodes privées ont une bonne raison de l'être, mais comme beaucoup d'autres choses en Python, leur caractère privé est en dernière instance une question de convention et non d'obligation.
+\end{enumerate}
+
+\paragraph{Pour en savoir plus sur les fonctions privées}
+\begin{itemize}
+  \item Le Python Tutorial  \footnote{\url{http://www.python.org/doc/current/tut/tut.html}} traite du fonctionnement des variables privées  \footnote{\url{http://www.python.org/doc/current/tut/node11.html\#SECTION0011600000000000000000}}.
+\end{itemize}
+
+\section{Résumé}
+
+Voila pour ce qui est des chicanes techniques des objets. Vous verrez une application réelle des méthodes de classe spéciales au Chapitre 12, qui utilise \emph{getattr} pour créer un mandataire d'un service web distant.
+
+Le prochain chapitre continuera d'utiliser ce programme d'exemple pour explorer d'autres concepts de Python comme les exceptions, les objets-fichiers et les boucles for.
+
+Avant de plonger dans le prochain chapitre, assurez-vous que vous vous sentez à l'aise pour :
+\begin{itemize}
+  \item Importer des modules en utilisant import module ou from module import
+  \item Definir et instancier des classes
+  \item Definir des méthodes \_\_init\_\_ et autres méthodes spéciales et comprendre quand elles sont appelées
+  \item Dériver de \emph{UserDict} pour définir des classes qui se comportent comme des dictionnaires
+  \item Définir des données attributs et des attributs de classe et comprendre la différence entre les deux
+  \item Définir des méthodes privées
+\end{itemize}
